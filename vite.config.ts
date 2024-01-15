@@ -53,6 +53,12 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
           changeOrigin: true, // 是否允许跨域
           ws: true,
         },
+        '/axw': {
+          target: 'https://51jishu.com', // 后台接口
+          changeOrigin: true, // 是否允许跨域
+          ws: true,
+          rewrite: (path) => path.replace(`/axw`, ''),
+        },
       },
     },
     build: {

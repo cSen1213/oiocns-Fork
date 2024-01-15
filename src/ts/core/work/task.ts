@@ -182,6 +182,7 @@ export class WorkTask extends FileInfo<schema.XEntity> implements IWorkTask {
           break;
       }
     }
+
     return executors;
   }
   async recallApply(): Promise<boolean> {

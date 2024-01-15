@@ -22,6 +22,9 @@ interface IProps {
 
 const ExecutorShowComp: React.FC<IProps> = (props) => {
   const data = props.executors || [];
+
+  console.log('3333',data);
+
   return (
     <div className={cls.layout}>
       <div className={cls.title}>已选{data.length}条数据</div>
@@ -51,6 +54,12 @@ const ExecutorShowComp: React.FC<IProps> = (props) => {
               );
             case 'Webhook':
               return <Webhook executor={item} deleteFuc={props.deleteFuc} />;
+            case '安心屋数据同步':
+              return (
+                <Common key={index} executor={item} deleteFuc={props.deleteFuc}>
+                  用于安心屋转化申请业务数据同步至科技大市场
+                </Common>
+              );
             default:
               return <></>;
           }

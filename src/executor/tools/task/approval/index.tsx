@@ -2,6 +2,7 @@ import { changeRecords } from '@/components/Common/ExecutorShowComp';
 import { command, model } from '@/ts/base';
 import { IWorkTask, TaskStatus } from '@/ts/core';
 import { IExecutor } from '@/ts/core/work/executor';
+import { approvelWork } from '@/utils/anxinwu/axwWork';
 import { getNodeByNodeId } from '@/utils/tools';
 import ProTable from '@ant-design/pro-table';
 import { Button, Card, Input, Modal, Space, message } from 'antd';
@@ -133,11 +134,16 @@ const TaskApproval: React.FC<TaskDetailType> = ({ task, finished, fromData }) =>
             const executor = executors.find(
               (item) => item.metadata.funcName == '字段变更',
             );
-            if (executor) {
-              setConfirm(<Confirm task={task} executor={executor} />);
-              return;
+            if (task.name.includes('成果转化申请')) {
+              console.log('333333', task, executors);
+              approvelWork(task);
             }
-            approving();
+
+            // if (executor) {
+            //   setConfirm(<Confirm task={task} executor={executor} />);
+            //   return;
+            // }
+            // approving();
           }}>
           通过
         </Button>
