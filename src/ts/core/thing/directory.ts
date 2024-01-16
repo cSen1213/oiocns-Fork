@@ -47,6 +47,8 @@ export interface IDirectory extends IStandardFileInfo<schema.XDirectory> {
   createFile(file: Blob, p?: OnProgress): Promise<ISysFileInfo | undefined>;
   /** 加载全部应用 */
   loadAllApplication(): Promise<IApplication[]>;
+  /** 加载所有的目录 */
+  loadAllDirectorys(): Promise<IDirectory[]>;
   /** 加载目录资源 */
   loadDirectoryResource(reload?: boolean): Promise<void>;
   /** 通知重新加载文件列表 */
@@ -139,6 +141,13 @@ export class Directory extends StandardFileInfo<schema.XDirectory> implements ID
       cnt.push(...this.standard.templates);
     }
     return cnt.sort((a, b) => (a.metadata.updateTime < b.metadata.updateTime ? 1 : -1));
+  }
+  async loadAllDirectorys(): Promise<IDirectory[]> {
+    const directorys: IDirectory[] = [...this.standard.directorys];
+    for (const item of this.children) {
+      directorys.push(...(await item.loadAllDirectorys()));
+    }
+    return directorys;
   }
   async loadContent(reload: boolean = false): Promise<boolean> {
     await this.loadFiles(reload);
