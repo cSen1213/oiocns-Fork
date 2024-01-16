@@ -22,7 +22,6 @@ async function getAppKey(companyName: string = '浙江省农业科学院') {
   }
 
   const md5Hash = Crypto.MD5(sign).toString().toLowerCase();
-  // .update(signStr).digest('hex');
   const res: any = await axios.post(
     baseUrl + '/userinfo/user/getAppKey',
     { companyName: '浙江省农业科学院' },
@@ -52,8 +51,6 @@ export const getLoginToken = async (): Promise<{
     const ret = await axios.post(
       baseUrl + `/userinfo/user/loginByAppKey`,
       {
-        // app_key: '7c1373b8fec010dba9b2cf06e7b232a7',
-        // app_secret: 'fec010dba9b2cf06',
         app_key: appinfo.appKey,
         app_secret: appinfo.appSecret,
       },
@@ -72,12 +69,10 @@ export const getLoginToken = async (): Promise<{
         }
       }
     }
-  } else {
-    return { success: false, messsgae: '单位信息查询失败' };
   }
   console.log('单位信息查询失败');
 
-  return { success: false, messsgae: '单位信息查询失败' };
+  return { success: false, messsgae: '科技大市场-单位信息查询失败' };
 };
 
 export const approvelWork = async (work: IWorkTask) => {
@@ -116,7 +111,7 @@ const pushAchievement = async (instanceData: model.InstanceDataModel) => {
         if (achievement_no) {
           console.log(achievement_no);
           if (form1) {
-            form1['512155583277834241'] = achievement_no;
+            form1['512155583277834241'] = achievement_no; //成果编号
             return true;
           }
         }
@@ -136,12 +131,12 @@ const getAchievementInfo = async (instanceData: model.InstanceDataModel) => {
   if (form1 && form2) {
     const detail = form2.map((a) => {
       return {
-        effective: 1,
-        owner: a['505330903514488840'] ?? '未知',
-        asset_no: a['505330903501905922'] ?? '未知',
-        inventor: (a['505330904571453445'] as string)?.split(/;|；/) ?? [],
-        patent_name: a['505330903506100235'] ?? '未知',
-        patent_no: a['505330903501905922'] ?? '未知',
+        effective: 1, //生效状态 1:生效;0未生效
+        owner: a['505330903514488840'] ?? '未知', //所有权人
+        asset_no: a['505330903501905922'] ?? '未知', //资产编号
+        inventor: (a['505330904571453445'] as string)?.split(/;|；/) ?? [], //发明人/完成人
+        patent_name: a['505330903506100235'] ?? '未知', // 专利名称
+        patent_no: a['505330903501905922'] ?? '未知', // 专利号
       };
     });
     const contact =
@@ -196,7 +191,7 @@ const getAchievementInfo = async (instanceData: model.InstanceDataModel) => {
       default:
         break;
     }
-    var classification = form1['505330904445624334'];
+    // var classification = form1['505330904445624334'];
     return {
       public: 1,
       is_back: true,

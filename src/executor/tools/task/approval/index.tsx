@@ -20,6 +20,8 @@ export interface ConfirmProps {
 }
 
 const TaskApproval: React.FC<TaskDetailType> = ({ task, finished, fromData }) => {
+  console.log('tasktasktask', task);
+
   if (task.isHistory) {
     return <></>;
   }
@@ -128,22 +130,26 @@ const TaskApproval: React.FC<TaskDetailType> = ({ task, finished, fromData }) =>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <Button
           type="primary"
-          onClick={() => {
+          onClick={async () => {
             const node = getNodeByNodeId(task.taskdata.nodeId, task.instanceData?.node);
             const executors = node ? task.loadExecutors(node) : [];
             const executor = executors.find(
               (item) => item.metadata.funcName == '字段变更',
             );
-            if (task.name.includes('成果转化申请')) {
-              console.log('333333', task, executors);
-              approvelWork(task);
-            }
+            console.log('executors', node, executor, executors);
 
-            // if (executor) {
-            //   setConfirm(<Confirm task={task} executor={executor} />);
-            //   return;
-            // }
-            // approving();
+            if (executor) {
+              setConfirm(<Confirm task={task} executor={executor} />);
+              return;
+            }
+            // 安心屋数据同步逻辑
+            const anxinwuExecutor = executors.find(
+              (item) => item.metadata.funcName == '安心屋数据同步',
+            );
+            console.log('安心屋数', task, executors, anxinwuExecutor);
+
+            anxinwuExecutor && (await anxinwuExecutor.execute(new Map([])));
+            approving();
           }}>
           通过
         </Button>

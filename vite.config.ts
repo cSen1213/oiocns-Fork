@@ -54,7 +54,8 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
           ws: true,
         },
         '/axw': {
-          target: 'https://51jishu.com', // 后台接口
+          // target: 'https://51jishu.com', // 后台接口
+          target: 'http://47.98.206.57',
           changeOrigin: true, // 是否允许跨域
           ws: true,
           rewrite: (path) => path.replace(`/axw`, ''),

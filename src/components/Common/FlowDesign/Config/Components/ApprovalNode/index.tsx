@@ -252,6 +252,7 @@ const ApprovalNode: React.FC<IProps> = (props) => {
                 executors={executors}
                 deleteFuc={(id: string) => {
                   setExecutors(executors.filter((a) => a.id != id));
+                  props.current.executors = executors.filter((a) => a.id != id);
                 }}
               />
             </span>

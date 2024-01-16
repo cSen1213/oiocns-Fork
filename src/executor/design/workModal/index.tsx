@@ -39,6 +39,8 @@ const ApplicationModal: React.FC<IProps> = ({ current, finished }) => {
       current.metadata.rule = JSON.stringify({
         hasGateway: validation.hasGateway,
       });
+      console.log('resource_', resource_);
+
       if (
         await current.update({
           ...current.metadata,

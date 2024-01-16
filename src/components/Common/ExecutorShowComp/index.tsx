@@ -22,9 +22,6 @@ interface IProps {
 
 const ExecutorShowComp: React.FC<IProps> = (props) => {
   const data = props.executors || [];
-
-  console.log('3333',data);
-
   return (
     <div className={cls.layout}>
       <div className={cls.title}>已选{data.length}条数据</div>

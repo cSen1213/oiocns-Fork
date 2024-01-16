@@ -20,7 +20,6 @@ const Node: React.FC<NodeProps> = (props: NodeProps) => {
   let isRoot = false;
   let isJGNode = (props.config.code as string).startsWith('JGNODE');
   let placeholder = '';
-  console.log(props);
   switch (props.config.type) {
     case AddNodeType.ROOT:
       isRoot = true;
