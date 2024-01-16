@@ -55,6 +55,7 @@ const TaskApproval: React.FC<TaskDetailType> = ({ task, finished, fromData }) =>
             item.options?.isRequired &&
             valueIsNull(data[item.id])
           ) {
+            console.log('错误信息', item);
             return false;
           }
         }
@@ -142,7 +143,7 @@ const TaskApproval: React.FC<TaskDetailType> = ({ task, finished, fromData }) =>
               (item) => item.metadata.funcName == '安心屋数据同步',
             );
             anxinwuExecutor && (await anxinwuExecutor.execute(new Map([])));
-            approving();
+            // approving();
           }}>
           通过
         </Button>
