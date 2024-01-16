@@ -21,8 +21,6 @@ export class PushAchievement extends Executor {
    */
   async execute(): Promise<boolean> {
     const instanceData = this.task.instanceData;
-    console.log('task', this.task);
-
     if (instanceData) {
       const fun = new PushAchievementTask(this.getCompanyName(), instanceData);
       await fun.getAppKey();
@@ -80,9 +78,10 @@ class PushAchievementTask implements PushAchievementTaskType {
     const sign = `${appKey}${appSecret}${timestampStr}`;
     //加密
     const md5Hash = Crypto.MD5(sign).toString().toLowerCase();
+    //TODO:修改为 companyName:this.companyName
     const res: any = await axios.post(
       baseUrl + '/userinfo/user/getAppKey',
-      { companyName: this.companyName ?? '浙江省农业科学院' },
+      { companyName: '杭州电子科技大学' },
       {
         headers: {
           'Content-Type': 'application/json',

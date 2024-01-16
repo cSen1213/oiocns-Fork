@@ -133,8 +133,6 @@ const TaskApproval: React.FC<TaskDetailType> = ({ task, finished, fromData }) =>
             const executor = executors.find(
               (item) => item.metadata.funcName == '字段变更',
             );
-            console.log('executors', node, executor, executors);
-
             if (executor) {
               setConfirm(<Confirm task={task} executor={executor} />);
               return;
@@ -143,8 +141,6 @@ const TaskApproval: React.FC<TaskDetailType> = ({ task, finished, fromData }) =>
             const anxinwuExecutor = executors.find(
               (item) => item.metadata.funcName == '安心屋数据同步',
             );
-            console.log('安心屋数', task, executors, anxinwuExecutor);
-
             anxinwuExecutor && (await anxinwuExecutor.execute(new Map([])));
             approving();
           }}>
