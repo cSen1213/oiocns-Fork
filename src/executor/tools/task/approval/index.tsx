@@ -2,7 +2,6 @@ import { changeRecords } from '@/components/Common/ExecutorShowComp';
 import { command, model } from '@/ts/base';
 import { IWorkTask, TaskStatus } from '@/ts/core';
 import { IExecutor } from '@/ts/core/work/executor';
-import { approvelWork } from '@/utils/anxinwu/axwWork';
 import { getNodeByNodeId } from '@/utils/tools';
 import ProTable from '@ant-design/pro-table';
 import { Button, Card, Input, Modal, Space, message } from 'antd';
@@ -20,8 +19,6 @@ export interface ConfirmProps {
 }
 
 const TaskApproval: React.FC<TaskDetailType> = ({ task, finished, fromData }) => {
-  console.log('tasktasktask', task);
-
   if (task.isHistory) {
     return <></>;
   }
