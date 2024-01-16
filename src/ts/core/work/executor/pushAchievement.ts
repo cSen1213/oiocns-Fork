@@ -82,7 +82,7 @@ class PushAchievementTask implements PushAchievementTaskType {
     const md5Hash = Crypto.MD5(sign).toString().toLowerCase();
     const res: any = await axios.post(
       baseUrl + '/userinfo/user/getAppKey',
-      { companyName: '浙江省农业科学院' },
+      { companyName: this.companyName ?? '浙江省农业科学院' },
       {
         headers: {
           'Content-Type': 'application/json',
