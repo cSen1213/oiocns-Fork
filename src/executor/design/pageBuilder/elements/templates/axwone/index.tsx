@@ -40,7 +40,7 @@ export default defineElement({
           );
           setLoading(true);
           const sortResults = item.content.map((ites) =>
-            finds.find((find) => find.id === ites.id),
+            finds.find((a) => a?.id === ites?.id),
           );
           return {
             title: item.title,
@@ -168,7 +168,9 @@ export default defineElement({
     return (
       <div className={cls.axw_template}>
         <div className={cls.banner}>{props.banner?.({})}</div>
-        <div className="cardGroup">
+        <div
+          className="cardGroup"
+          style={{ position: 'absolute', top: '315px', padding: '12px' }}>
           <div className="cardItem">
             <RenderAxwInfo />
           </div>
