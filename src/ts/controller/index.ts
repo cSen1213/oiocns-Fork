@@ -1,4 +1,12 @@
-import { IApplication, IFile, IPerson, ISession, ITarget, UserProvider } from '@/ts/core';
+import {
+  IApplication,
+  IFile,
+  IPerson,
+  ISession,
+  ITarget,
+  UserProvider,
+  IDirectory,
+} from '@/ts/core';
 import { common } from '@/ts/base';
 import { IWorkProvider } from '../core/work/provider';
 import { IPageTemplate } from '../core/thing/standard/page';
@@ -90,6 +98,18 @@ class IndexController extends Controller {
     }
     return files;
   }
+
+  /** 加载安心屋所有目录 */
+  async loadAxwContents(): Promise<IDirectory[]> {
+    const directorys: IDirectory[] = [];
+    for (const directory of this.targets
+      .filter((i) => i.session.isMyChat)
+      .map((a) => a.directory)) {
+      directorys.push(...(await directory.loadAllDirectorys()));
+    }
+    return directorys;
+  }
+
   /** 所有相关会话 */
   get chats(): ISession[] {
     const chats: ISession[] = [];
