@@ -17,6 +17,20 @@ const AXWPORTALID = [
         directoryID: '505330878596128769',
       },
       {
+        id: '507473484641869825',
+        name: '成果录入',
+        directoryID: '505330878478688257',
+        applicationID: '507305816613855233',
+        applicationname: '安心屋',
+      },
+      {
+        id: '507472559793643521',
+        name: '成果普查',
+        directoryID: '505330878478688257',
+        applicationID: '507305816613855233',
+        applicationname: '安心屋',
+      },
+      {
         id: '507470117328789504',
         name: '成果转化申请',
         directoryID: '505330878478688257',
@@ -27,13 +41,6 @@ const AXWPORTALID = [
         id: '505330904395292673',
         name: '成果转化申请列表',
         directoryID: '505330878801649665',
-      },
-      {
-        id: '507472559793643521',
-        name: '成果普查',
-        directoryID: '505330878478688257',
-        applicationID: '507305816613855233',
-        applicationname: '安心屋',
       },
       {
         id: '507469372600754176',
