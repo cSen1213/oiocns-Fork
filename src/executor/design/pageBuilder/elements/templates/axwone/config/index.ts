@@ -68,9 +68,11 @@ const AXWPORTALID = [
         applicationname: '安心屋',
       },
       {
-        directoryID: '505330878596128769',
-        id: '505330878965227521',
+        directoryID: '505330878478688257',
+        id: '507468067060719616',
         name: '收益分配登记',
+        applicationID: '507305816613855233',
+        applicationname: '安心屋',
       },
       {
         directoryID: '505330878965227521',
