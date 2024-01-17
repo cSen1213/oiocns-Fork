@@ -100,14 +100,29 @@ class IndexController extends Controller {
   }
 
   /** 加载安心屋所有目录 */
-  async loadAxwContents(): Promise<IDirectory[]> {
+  async loadAxwDirectorys(): Promise<IDirectory[]> {
     const directorys: IDirectory[] = [];
     for (const directory of this.targets
       .filter((i) => i.session.isMyChat)
+      // 只要浙江省科学技术厅下的资源
+      .filter((s) => s.belongId === '464368384847515648')
       .map((a) => a.directory)) {
       directorys.push(...(await directory.loadAllDirectorys()));
     }
     return directorys;
+  }
+
+  /** 加载安心屋下的所有应用 */
+  async loadAxwApplication(): Promise<IApplication[]> {
+    const applications: IApplication[] = [];
+    for (const application of this.targets
+      .filter((i) => i.session.isMyChat)
+      // 只要浙江省科学技术厅下的资源
+      .filter((s) => s.belongId === '464368384847515648')
+      .map((a) => a.directory)) {
+      applications.push(...(await application.loadAllApplication()));
+    }
+    return applications;
   }
 
   /** 所有相关会话 */

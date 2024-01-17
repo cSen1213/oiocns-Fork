@@ -18,29 +18,32 @@ type axwType = {
 export default defineElement({
   render(props) {
     const RenderAxwInfo: React.FC = () => {
-      const [data, setData] = useState<axwType[]>([]); // 数据源
-      const [loading, setLoading] = useState<boolean>(false); // 加载loading
+      const [data, setData] = useState<axwType[]>([]);
+      const [loading, setLoading] = useState<boolean>(false);
 
       /** 加载主体数据 */
       const loadContents = async () => {
-        const axwContents = await orgCtrl.loadAxwContents();
+        const axwDriectorys = await orgCtrl.loadAxwDirectorys();
+        const axwApplications = await orgCtrl.loadApplications();
         const promises = AXWPORTALID.map(async (item) => {
           const finds: IFile[] = [];
           await Promise.all(
             item.content.map(async (ite) => {
-              const findResult = axwContents.find((ita) => ita.id === ite.directoryID);
-              if (findResult) {
-                if (await findResult.loadContent()) {
-                  if (ite.applicationID) {
-                    finds.push(
-                      findResult
-                        .content()
-                        .find((i) => i.id === ite.applicationID)
-                        ?.content()
-                        .find((s) => s.id === ite.id)!,
-                    );
-                  } else {
-                    finds.push(findResult.content().find((i) => i.id === ite.id)!);
+              const findDirRes = axwDriectorys.find((ita) => ita.id === ite.directoryID);
+              const findAppRes = axwApplications.find(
+                (ita) => ita.id === ite.applicationID,
+              );
+              if (ite.applicationID) {
+                if (findAppRes) {
+                  if (await findAppRes.loadContent()) {
+                    finds.push(findAppRes?.content().find((i) => i.id === ite.id)!);
+                  }
+                }
+              }
+              if (ite.directoryID) {
+                if (findDirRes) {
+                  if (await findDirRes.loadContent()) {
+                    finds.push(findDirRes.content().find((i) => i.id === ite.id)!);
                   }
                 }
               }
