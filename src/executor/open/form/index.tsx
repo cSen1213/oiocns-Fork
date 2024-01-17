@@ -12,6 +12,7 @@ import { ImCopy, ImShuffle, ImTicket } from 'react-icons/im';
 import { Controller } from '@/ts/controller';
 import { Spin, message } from 'antd';
 import ThingView from './detail';
+import History from './history';
 import useAsyncLoad from '@/hooks/useAsyncLoad';
 import { Theme } from '@/config/theme';
 
@@ -35,6 +36,13 @@ const FormView: React.FC<IProps> = ({ form, finished }) => {
     if (!selectMenu || !rootMenu) return <></>;
     const loadContent = () => {
       if (select) {
+        console.log(form);
+
+        if (form.id === '535176818458771457') {
+          return (
+            <History form={form} thingData={select} onBack={() => setSelcet(undefined)} />
+          );
+        }
         return (
           <ThingView form={form} thingData={select} onBack={() => setSelcet(undefined)} />
         );

@@ -13,6 +13,7 @@ interface IWorkFormProps {
   belong: IBelong;
   nodeId: string;
   data: model.InstanceDataModel;
+  viewFromId?: string; //仅展示此id的表单
 }
 
 /** 流程节点表单 */

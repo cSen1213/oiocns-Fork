@@ -4,6 +4,7 @@ type PredicateType<T> = (value: T, index: number, list: T[]) => boolean;
 
 class List<T> {
   protected _elements: T[];
+    static Item: IntrinsicAttributes;
 
   /**
    * 使用数组构建列表
