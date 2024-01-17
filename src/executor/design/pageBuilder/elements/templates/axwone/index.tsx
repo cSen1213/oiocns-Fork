@@ -120,34 +120,31 @@ export default defineElement({
       };
 
       return (
-        <Spin spinning={loading} tip={'加载中...'}>
-          <div className="cardItem-viewer">
-            <div
-              className="cardGroup"
-              style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                justifyContent: 'flex-start',
-              }}>
-              {data.map((item: axwType) => {
-                return loadGroupItem(item.title, item.content);
-              })}
+        <div className={cls.render_axw}>
+          <Spin spinning={loading} tip={'加载中...'}>
+            <div className="cardItem-viewer">
+              <div
+                className="cardGroup"
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'flex-start',
+                  padding: '12px',
+                }}>
+                {data.map((item: axwType) => {
+                  return loadGroupItem(item.title, item.content);
+                })}
+              </div>
             </div>
-          </div>
-        </Spin>
+          </Spin>
+        </div>
       );
     };
 
     return (
       <div className={cls.axw_template}>
         <div className={cls.banner}>{props.banner?.({})}</div>
-        <div
-          className="cardGroup"
-          style={{ position: 'absolute', top: '315px', padding: '12px' }}>
-          <div className="cardItem">
-            <RenderAxwInfo />
-          </div>
-        </div>
+        <RenderAxwInfo />
       </div>
     );
   },
