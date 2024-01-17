@@ -62,6 +62,7 @@ export class WorkApply implements IWorkApply {
           }
         }
         if (isRequired && valueIsNull(data[item.id])) {
+          console.log('错误信息', item);
           return false;
         }
       }

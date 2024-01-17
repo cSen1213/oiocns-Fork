@@ -150,7 +150,7 @@ export const FullEntityColumns = (fields: model.FieldModel[]) => {
       remark: '由系统生成的唯一标记,无实义.',
       options: {
         fixed: true,
-        visible: true,
+        visible: false,
       },
     },
     {
