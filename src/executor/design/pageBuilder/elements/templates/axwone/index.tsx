@@ -99,7 +99,6 @@ export default defineElement({
             className="cardItem"
             style={{
               width: '32%',
-              maxWidth: 500,
               marginRight: '16px',
               marginBottom: '20px',
             }}>
