@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Space, Spin } from 'antd';
 import orgCtrl from '@/ts/controller';
+import { IFile } from '@/ts/core';
+import { command } from '@/ts/base';
+import { kernel } from '@/ts/base';
+import EntityIcon from '@/components/Common/GlobalComps/entityIcon';
 import { defineElement } from '../../defineElement';
 import Transaction from '/img/transaction.png';
 import cls from './index.module.less';
-import { IFile } from '@/ts/core';
-import { command } from '@/ts/base';
-import EntityIcon from '@/components/Common/GlobalComps/entityIcon';
-import { AXWPORTALID } from './config';
+import { AXWType } from './config/index';
 
 type axwType = {
   title: string;
@@ -18,14 +19,43 @@ type axwType = {
 export default defineElement({
   render(props) {
     const RenderAxwInfo: React.FC = () => {
-      const [data, setData] = useState<axwType[]>([]);
-      const [loading, setLoading] = useState<boolean>(false);
+      const [data, setData] = useState<axwType[]>([]); // 数据源
+      const [loading, setLoading] = useState<boolean>(false); // 加载动画
+      const [dataSource, setDataSource] = useState<AXWType[]>([]); // 在线配置文件数据源
+
+      /** 加载安心屋配置文件 */
+      const loadAxwConfig = async () => {
+        const axwConfigRes = await orgCtrl.loadAxwConfigDir();
+        if (axwConfigRes.length > 0) {
+          if (await axwConfigRes[0].loadContent()) {
+            let res: any = axwConfigRes[0].content();
+            const awxConfigData = 'https://asset.orginone.cn' + res[0].filedata.shareLink;
+            if (awxConfigData) {
+              const data = await fetchData(awxConfigData);
+              setDataSource(data);
+            }
+          }
+        }
+      };
+
+      /** 请求在线json配置文件 */
+      const fetchData = async (url: string) => {
+        const response = await kernel.httpForward({
+          uri: url,
+          method: 'GET',
+          header: { 'Content-Type': 'application/json' },
+          content: '',
+        });
+        if (response.code === 200) {
+          return JSON.parse(response.data.content);
+        }
+      };
 
       /** 加载主体数据 */
       const loadContents = async () => {
         const axwDriectorys = await orgCtrl.loadAxwDirectorys();
         const axwApplications = await orgCtrl.loadApplications();
-        const promises = AXWPORTALID.map(async (item) => {
+        const promises = dataSource?.map(async (item) => {
           const finds: IFile[] = [];
           await Promise.all(
             item.content.map(async (ite) => {
@@ -62,7 +92,7 @@ export default defineElement({
 
         Promise.all(promises).then((results) => {
           setLoading(false);
-          const orderedResults = AXWPORTALID.map((item) =>
+          const orderedResults = dataSource.map((item) =>
             results.find((result) => result.id === item.id),
           );
           setData(orderedResults as axwType[]);
@@ -70,8 +100,14 @@ export default defineElement({
       };
 
       useEffect(() => {
-        loadContents();
+        loadAxwConfig();
       }, []);
+
+      useEffect(() => {
+        if (dataSource.length > 0) {
+          loadContents();
+        }
+      }, [dataSource]);
 
       const loadCommonCard = (item: IFile) => (
         <div
