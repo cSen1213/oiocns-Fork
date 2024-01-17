@@ -56,7 +56,7 @@ export default defineElement({
           return {
             title: item.title,
             id: item.id,
-            content: sortResults,
+            content: sortResults.filter(Boolean),
           };
         });
 
