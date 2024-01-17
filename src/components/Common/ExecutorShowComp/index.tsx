@@ -51,6 +51,12 @@ const ExecutorShowComp: React.FC<IProps> = (props) => {
               );
             case 'Webhook':
               return <Webhook executor={item} deleteFuc={props.deleteFuc} />;
+            case '安心屋单位推送':
+              return (
+                <Common key={index} executor={item} deleteFuc={props.deleteFuc}>
+                  用于安心屋单位数据同步至科技大市场获取密钥
+                </Common>
+              );
             case '安心屋数据同步':
               return (
                 <Common key={index} executor={item} deleteFuc={props.deleteFuc}>

@@ -142,8 +142,19 @@ const TaskApproval: React.FC<TaskDetailType> = ({ task, finished, fromData }) =>
             const anxinwuExecutor = executors.find(
               (item) => item.metadata.funcName == '安心屋数据同步',
             );
-            anxinwuExecutor && (await anxinwuExecutor.execute(new Map([])));
-            // approving();
+            // 安心屋数据同步逻辑
+            const anxinwuExecutor2 = executors.find(
+              (item) => item.metadata.funcName == '安心屋单位推送',
+            );
+            if (anxinwuExecutor) {
+              const success = await anxinwuExecutor.execute(new Map([]));
+              success && approving();
+            } else if (anxinwuExecutor2) {
+              await anxinwuExecutor2.execute(new Map([]));
+              approving();
+            } else {
+              approving();
+            }
           }}>
           通过
         </Button>

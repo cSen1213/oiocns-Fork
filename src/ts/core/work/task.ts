@@ -11,6 +11,7 @@ import { IExecutor } from './executor';
 import { FieldsChange } from './executor/change';
 import { Webhook } from './executor/webhook';
 import { PushAchievement } from './executor/pushAchievement';
+import { PushCompanyInfo } from './executor/pushCompanyInfo';
 export type TaskTypeName = '待办' | '已办' | '抄送' | '已发起';
 
 export interface IWorkTask extends IFile {
@@ -168,10 +169,6 @@ export class WorkTask extends FileInfo<schema.XEntity> implements IWorkTask {
   }
   loadExecutors(node: model.WorkNodeModel) {
     let executors: IExecutor[] = [];
-    console.log(
-      'loadExecutors',
-      node.executors.map((v) => v.funcName),
-    );
 
     for (const item of node.executors) {
       switch (item.funcName) {
@@ -188,6 +185,9 @@ export class WorkTask extends FileInfo<schema.XEntity> implements IWorkTask {
           break;
         case '安心屋数据同步':
           executors.push(new PushAchievement(item, this));
+          break;
+        case '安心屋单位推送':
+          executors.push(new PushCompanyInfo(item, this));
           break;
         default:
           break;

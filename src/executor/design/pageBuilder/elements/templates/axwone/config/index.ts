@@ -38,7 +38,7 @@ const AXWPORTALID = [
         applicationname: '安心屋',
       },
       {
-        id: '505330904395292673',
+        id: '535176818869813249',
         name: '成果转化申请列表',
         directoryID: '505330878801649665',
       },

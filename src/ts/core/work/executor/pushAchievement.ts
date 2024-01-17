@@ -6,11 +6,11 @@ import Crypto from 'crypto-js';
 import { Executor } from '.';
 const baseUrl = '/axw';
 // 转化申请_填写信息表单ID
-const zhuanhua_tianxiexinxi_formId = '505330904395292673';
+const zhuanhua_tianxiexinxi_formId = '535176818869813249';
 // 转化申请_选择成果表单ID
-const zhuanhua_xuanzechengguo_formId = '505330904529510401';
+const zhuanhua_xuanzechengguo_formId = '535176819322798081';
 //交易凭证号
-const zhuanhua_jiaoyipzh = 'jiaoyipinghzneghao';
+const zhuanhua_jiaoyipzh = '535176818974670855';
 /**
  * 同步安心屋数据至科技大市场
  */
@@ -52,7 +52,7 @@ type PushAchievementTaskType = {
   pushMoneyCertificate: () => boolean;
 };
 
-class PushAchievementTask implements PushAchievementTaskType {
+export class PushAchievementTask implements PushAchievementTaskType {
   companyName: string;
   token: string = '';
   instanceData: model.InstanceDataModel;
@@ -81,7 +81,7 @@ class PushAchievementTask implements PushAchievementTaskType {
     //TODO:修改为 companyName:this.companyName
     const res: any = await axios.post(
       baseUrl + '/userinfo/user/getAppKey',
-      { companyName: '杭州电子科技大学' },
+      { companyName: '浙江省农业科学院' },
       {
         headers: {
           'Content-Type': 'application/json',
@@ -145,19 +145,15 @@ class PushAchievementTask implements PushAchievementTaskType {
 
     console.log('pushTransferData', achievement_no, this.instanceData);
     const data = this.instanceData.data; //formName
-    for (const key in data) {
-      if (Object.prototype.hasOwnProperty.call(data, key)) {
-        const item = data[key];
-        if (Array.isArray(item) && item.length > 0 && item[0].after.length === 1) {
-          const formData = item[0].after[0];
-          if (formData.name === '成果信息填写') {
-            formData[zhuanhua_jiaoyipzh] = achievement_no;
-          }
-        }
-      }
+    const last = data[zhuanhua_tianxiexinxi_formId]?.at(-1);
+    const form1 = last?.after[0];
+    if (form1) {
+      form1[zhuanhua_jiaoyipzh] = achievement_no;
+      this.instanceData.primary[zhuanhua_jiaoyipzh] = achievement_no;
+      return true;
     }
 
-    return true;
+    return false;
   }
   /**
    * @desc: 推送到账凭证
@@ -171,28 +167,31 @@ const pushAchievement = async (instanceData: model.InstanceDataModel, token: str
   const last = instanceData.data[zhuanhua_tianxiexinxi_formId]?.at(-1);
   const form1 = last?.after[0];
   const data = await getAchievementInfo(instanceData);
-  var ret = await axios.post(baseUrl + `/api/open/achievement/submit`, data, {
+  const ret = await axios.post(baseUrl + `/api/open/achievement/submit`, data, {
     headers: {
       'Content-Type': 'application/json',
       Authorization: token,
     },
   });
   if (ret.status == 200) {
-    console.info('推送成果', ret.data);
+    console.info('推送成果', instanceData, data);
 
     const datas = ret.data['datas'];
     if (datas) {
       const achievement_no = datas['achievement_no'];
       if (achievement_no) {
         if (form1) {
-          form1['512155583277834241'] = achievement_no; //成果编号
+          form1[zhuanhua_jiaoyipzh] = achievement_no; //成果编号
           logger.msg('推送成果成功! 交易凭证:' + achievement_no);
           return achievement_no;
         }
       }
+    } else {
+      logger.error('推送成果失败!' + ret.data.errMsg);
+      return false;
     }
   } else {
-    logger.error('推送成果失败!' + JSON.stringify(ret.data));
+    logger.error('推送成果失败!' + ret.data.errMsg);
   }
 
   return false;
@@ -205,39 +204,39 @@ const getAchievementInfo = async (instanceData: model.InstanceDataModel) => {
     const detail = form2.map((a) => {
       return {
         effective: 1, //生效状态 1:生效;0未生效
-        owner: a['505330903514488840'] ?? '未知', //所有权人
-        asset_no: a['505330903501905922'] ?? '未知', //资产编号
-        inventor: (a['505330904571453445'] as string)?.split(/;|；/) ?? [], //发明人/完成人
-        patent_name: a['505330903506100235'] ?? '未知', // 专利名称
-        patent_no: a['505330903501905922'] ?? '未知', // 专利号
+        owner: a['535176819490570247'] ?? '未知', //所有权人
+        asset_no: a['535176819490570241'] ?? '未知', //资产编号
+        inventor: (a['535176819490570246'] as string)?.split(/;|；/) ?? [], //发明人/完成人
+        patent_name: a['535176819490570242'] ?? '未知', // 专利名称
+        patent_no: a['535200121709801473'] ?? '未知', // 专利号--职务成果ID
       };
     });
     const contact =
-      (await orgCtrl.user.findEntityAsync(form1['505330904445624325']))?.name ?? '未知';
+      (await orgCtrl.user.findEntityAsync(form1['535176818974670850']))?.name ?? '未知'; //联系人
     var transfer_mode = 'apply_transfer';
-    switch (form1['505330904445624336']) {
-      case 'S505330879372075010':
+    switch (form1['535176818974670849']) {
+      case 'S535176676863262722':
         transfer_mode = 'patent_transfer';
         break;
-      case 'S505330879372075025':
+      case 'S535176676863262723':
         transfer_mode = 'apply_transfer';
         break;
-      case 'S505330879372075011':
+      case 'S535176676863262726':
         transfer_mode = 'ordinary';
         break;
-      case '505330879372075014':
+      case 'S535176676863262728':
         transfer_mode = 'exclusive';
         break;
-      case 'S505330879372075016':
+      case 'S535176676863262730':
         transfer_mode = 'exclude';
         break;
-      case 'SF':
+      case 'S535176676863262732':
         transfer_mode = 'other_permit';
         break;
-      case 'S505330879372075019':
+      case 'S535176676863262733':
         transfer_mode = 'free';
         break;
-      case 'S505330879372075021':
+      case '535176676863262736':
         transfer_mode = 'shareholder';
         break;
       default:
@@ -245,20 +244,20 @@ const getAchievementInfo = async (instanceData: model.InstanceDataModel) => {
         break;
     }
     var maturity = 'development';
-    switch (form1['505330904445624327']) {
-      case 'S505330879762145282':
+    switch (form1['535176818970476552']) {
+      case 'S535176676355751938':
         maturity = 'development';
         break;
-      case 'S505330879762145284':
+      case 'S535176676355751939':
         maturity = 'demo';
         break;
-      case 'S505330879762145286':
+      case 'S535176676355751942':
         maturity = 'small';
         break;
-      case 'S505330879762145287':
+      case 'S535176676355751944':
         maturity = 'pilot';
         break;
-      case 'S505330879762145290':
+      case 'S535176676355751945':
         maturity = 'production';
         break;
       default:
@@ -275,9 +274,9 @@ const getAchievementInfo = async (instanceData: model.InstanceDataModel) => {
       //成熟度
       maturity: maturity,
       //单据编号
-      invoice_no: 'CGZH20220417000094',
+      invoice_no: form1['535176818970476545'],
       //成果名称
-      name_cn: form1['505330903522877455'],
+      name_cn: form1['535176818970476546'],
       //行业分类
       classification: ['6', '6001'],
       //成果详情
@@ -285,14 +284,17 @@ const getAchievementInfo = async (instanceData: model.InstanceDataModel) => {
       //定价方式
       pricing_type: 'definite',
       //成果说明
-      detail_url_cn: form1['505330904445624328'] ?? ' ',
+      detail_url_cn: form1['535176818970476546'] ?? ' ',
       //所属地区
       affiliating_area: ['0', '330000', '330101'],
       //赋权年限
       permit_period: '',
       //价格
       price: {
-        amount: form1['505330903510294534'],
+        // amount: form1['505330903510294534'],
+        amount: form2
+          .map((c) => c['535176819490570248'])
+          .reduce((acc, currVal) => (Number(acc) ?? 0) + (Number(currVal) ?? 0)),
       },
       //成果联系人
       contact: contact,
