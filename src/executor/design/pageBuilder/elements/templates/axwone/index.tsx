@@ -9,15 +9,23 @@ import { command } from '@/ts/base';
 import EntityIcon from '@/components/Common/GlobalComps/entityIcon';
 import { AXWPORTALID } from './config';
 
+type axwType = {
+  title: string;
+  id: string;
+  content: IFile[];
+};
+
 export default defineElement({
   render(props) {
     const RenderAxwInfo: React.FC = () => {
-      const [data, setData] = useState<any>([]);
-      const [loading, setLoading] = useState<boolean>(false);
+      const [data, setData] = useState<axwType[]>([]); // 数据源
+      const [loading, setLoading] = useState<boolean>(false); // 加载loading
+
+      /** 加载主体数据 */
       const loadContents = async () => {
         const axwContents = await orgCtrl.loadAxwContents();
         const promises = AXWPORTALID.map(async (item) => {
-          const finds: any[] = [];
+          const finds: IFile[] = [];
           await Promise.all(
             item.content.map(async (ite) => {
               const findResult = axwContents.find((ita) => ita.id === ite.directoryID);
@@ -29,10 +37,10 @@ export default defineElement({
                         .content()
                         .find((i) => i.id === ite.applicationID)
                         ?.content()
-                        .find((s) => s.id === ite.id),
+                        .find((s) => s.id === ite.id)!,
                     );
                   } else {
-                    finds.push(findResult.content().find((i) => i.id === ite.id));
+                    finds.push(findResult.content().find((i) => i.id === ite.id)!);
                   }
                 }
               }
@@ -48,50 +56,14 @@ export default defineElement({
             content: sortResults,
           };
         });
+
         Promise.all(promises).then((results) => {
           setLoading(false);
           const orderedResults = AXWPORTALID.map((item) =>
             results.find((result) => result.id === item.id),
           );
-          setData(orderedResults);
+          setData(orderedResults as axwType[]);
         });
-        // AXWPORTALID.map(async (item) => {
-        //   item.content.map(async (ite) => {
-        //     const findResult = axwContents.find((ita) => ita.id === ite.directoryID);
-        //     if (findResult) {
-        //       if (await findResult.loadContent()) {
-        //         finds.push(findResult.content().find((i) => i.id === ite.id));
-        //       }
-        //     }
-        //   });
-        //   setLoading(true);
-        //   result.push({
-        //     title: item.title,
-        //     id: item.title,
-        //     content: finds,
-        //   });
-        //   if (result.length === AXWPORTALID.length) {
-        //     setLoading(false);
-        //     setData(result);
-        //   }
-        //   // const findResult = axwContents.find((ita) => ita.id === item.directoryID);
-        //   // if (findResult) {
-        //   //   if (await findResult.loadContent()) {
-        //   //     result.push({
-        //   //       title: item.title,
-        //   //       id: findResult.id,
-        //   //       content: item.content.map((x) => {
-        //   //         return findResult.content().find((i) => i.id === x.id);
-        //   //       }),
-        //   //     });
-        //   //     setLoading(true);
-        //   //     if (result.length === AXWPORTALID.length) {
-        //   //       setLoading(false);
-        //   //       setData(result);
-        //   //     }
-        //   //   }
-        //   // }
-        // });
       };
 
       useEffect(() => {
@@ -117,7 +89,7 @@ export default defineElement({
         </div>
       );
 
-      const loadGroupItem = (title: string, data: any[]) => {
+      const loadGroupItem = (title: string, data: IFile[]) => {
         if (data.length < 1) return <></>;
         return (
           <div
@@ -145,23 +117,21 @@ export default defineElement({
       };
 
       return (
-        <>
-          <Spin spinning={loading} tip={'加载中...'}>
-            <div className="cardItem-viewer">
-              <div
-                className="cardGroup"
-                style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  justifyContent: 'flex-start',
-                }}>
-                {data.map((item: any) => {
-                  return loadGroupItem(item.title, item.content);
-                })}
-              </div>
+        <Spin spinning={loading} tip={'加载中...'}>
+          <div className="cardItem-viewer">
+            <div
+              className="cardGroup"
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                justifyContent: 'flex-start',
+              }}>
+              {data.map((item: axwType) => {
+                return loadGroupItem(item.title, item.content);
+              })}
             </div>
-          </Spin>
-        </>
+          </div>
+        </Spin>
       );
     };
 

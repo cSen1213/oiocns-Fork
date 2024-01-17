@@ -145,6 +145,8 @@ export type AXWType = {
     id: string;
     name: string;
     directoryID: string;
+    applicationID?: string;
+    applicationname?: string;
   }[];
 };
 
