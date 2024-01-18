@@ -53,13 +53,13 @@ const TaskView: React.FC<taskViewType> = ({ title, instance, formId }) => {
       };
     }),
   ].filter(Boolean);
-  console.log(7777, instanceList);
+  console.log('流程信息', instanceList);
   return (
     <>
       {data && data.fields[formId] && (
         <>
           <WorkFormViewer
-            form={{ id: '111', name: title } as schema.XForm}
+            form={{ id: '1', name: title } as schema.XForm}
             fields={data.fields[formId]}
             data={data.data[formId][0].after[0]}
             changedFields={[]}
