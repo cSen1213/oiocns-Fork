@@ -3,7 +3,7 @@ import orgCtrl from '@/ts/controller';
 import { schema } from '@/ts/base';
 import { InstanceDataModel } from '@/ts/base/model';
 import WorkFormViewer from '@/components/DataStandard/WorkForm/Viewer';
-import { List, Typography } from 'antd';
+import { List } from 'antd';
 import EntityIcon from '@/components/Common/GlobalComps/entityIcon';
 interface taskViewType {
   instance: any;
