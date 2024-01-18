@@ -37,27 +37,37 @@ const FormView: React.FC<IProps> = ({ form, finished }) => {
     if (!selectMenu || !rootMenu) return <></>;
     const loadContent = () => {
       if (select) {
-        console.log('打开表单', form);
-        //成果视图表单 查看
-        if (form.id === '535176818458771457') {
-          return (
-            <History form={form} thingData={select} onBack={() => setSelcet(undefined)} />
-          );
+        console.log('打开表单', form, form.metadata.openType);
+
+        switch (form.metadata.openType) {
+          case '事项':
+            //办事视图明细 查看
+            return (
+              <BillHistory
+                form={form}
+                thingData={select}
+                onBack={() => setSelcet(undefined)}
+              />
+            );
+          // 成果视图表单 查看
+          case '关联事项':
+            return (
+              <History
+                form={form}
+                thingData={select}
+                onBack={() => setSelcet(undefined)}
+              />
+            );
+          default:
+            //默认视图
+            return (
+              <ThingView
+                form={form}
+                thingData={select}
+                onBack={() => setSelcet(undefined)}
+              />
+            );
         }
-        //办事视图明细 查看
-        if (form.id === '535176821000519681') {
-          return (
-            <BillHistory
-              form={form}
-              thingData={select}
-              onBack={() => setSelcet(undefined)}
-            />
-          );
-        }
-        //默认视图
-        return (
-          <ThingView form={form} thingData={select} onBack={() => setSelcet(undefined)} />
-        );
       }
       return (
         <GenerateThingTable

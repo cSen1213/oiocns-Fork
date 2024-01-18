@@ -193,6 +193,8 @@ export type XForm = {
   options: XFormProps | undefined;
   // 表单的特性
   attributes: XAttribute[];
+  //打开方式
+  openType: string;
   // 使用表单的流程节点
   bindNodes: XWorkNode[] | undefined;
   // 表单的目录
