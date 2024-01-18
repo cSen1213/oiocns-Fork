@@ -24,10 +24,12 @@ const TaskView: React.FC<taskViewType> = ({ title, instance, formId }) => {
         instance.belongId,
       );
       if (detail) {
+        console.log('loadInstanceDetail', JSON.parse(detail.data || '{}'));
+
         setTask(detail.tasks);
         setData(JSON.parse(detail.data || '{}'));
 
-        console.log(detail.tasks, JSON.parse(detail.data || '{}').data[formId]);
+        // console.log(detail.tasks, JSON.parse(detail.data || '{}').data[formId]);
       }
     }, 10);
   }, []);

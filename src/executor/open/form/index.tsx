@@ -36,8 +36,6 @@ const FormView: React.FC<IProps> = ({ form, finished }) => {
     if (!selectMenu || !rootMenu) return <></>;
     const loadContent = () => {
       if (select) {
-        console.log(form);
-
         if (form.id === '535176818458771457') {
           return (
             <History form={form} thingData={select} onBack={() => setSelcet(undefined)} />

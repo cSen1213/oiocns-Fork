@@ -1148,4 +1148,90 @@ export default class KernelApi {
       }
     }
   }
+
+  /**
+   * RECID 自己的ID
+   * MASTERID 主表ID
+   * 根据RECID 加载 MASTERID
+   * @param  过滤参数
+   * @returns {model.LoadResult<T>} 移除异步结果
+   */
+  public async loadMasterId(
+    belongId: string,
+    recid: string, // 职务成果ID
+  ): Promise<model.LoadResult<schema.XThing[]>> {
+    const res = await this.dataProxy({
+      module: 'Collection',
+      action: 'Load',
+      belongId,
+      relations: [],
+      flag: 'loadThing',
+      params: {
+        skip: 0,
+        take: 1000,
+        requireTotalCount: true,
+        userData: [],
+        options: {
+          match: {
+            name: '选择成果（成果转化）',
+            ZLID: recid, //刚才拿到的职务成果的RECID
+          },
+        },
+        belongId: belongId,
+        collName: '_system-things',
+      },
+    });
+    const result: model.LoadResult<any> = { ...res, ...res.data };
+    if (!Array.isArray(result.data)) {
+      result.data = [];
+    }
+    return result;
+  }
+
+  /**
+   * 根据MASTERID 加载 流程数据
+   * @param  过滤参数
+   * @returns {model.LoadResult<T>} 移除异步结果
+   */
+  public async loadMasterInstance(
+    belongId: string,
+    masterid: string, // 主表ID
+  ): Promise<model.LoadResult<schema.XThing[]>> {
+    const res = await this.dataProxy({
+      module: 'Collection',
+      action: 'Load',
+      belongId,
+      relations: [],
+      flag: 'loadThing',
+      params: {
+        skip: 0,
+        take: 1000,
+        requireTotalCount: true,
+        userData: [],
+        options: {
+          match: {
+            name: {
+              _in_: [
+                '转化信息',
+                '选择成果（成果转化）',
+                '上传附件',
+                '定价/收益方式确定',
+                '意向受让方',
+                '团队内部收益分配',
+                '分配比例',
+              ],
+            },
+            MASTERID: masterid, //刚才拿到的主表的MASTERID
+          },
+        },
+        belongId: belongId,
+        collName: '_system-things',
+      },
+    });
+    const result: model.LoadResult<any> = { ...res, ...res.data };
+    if (!Array.isArray(result.data)) {
+      result.data = [];
+    }
+    return result;
+  }
 }
