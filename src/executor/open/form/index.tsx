@@ -8,14 +8,14 @@ import useMenuUpdate from '@/hooks/useMenuUpdate';
 import WorkForm from '@/components/DataStandard/WorkForm';
 import GenerateThingTable from '@/executor/tools/generate/thingTable';
 import CustomStore from 'devextreme/data/custom_store';
-import { ImCopy, ImShuffle, ImTicket } from 'react-icons/im';
+// import { ImCopy, ImShuffle, ImTicket } from 'react-icons/im';
 import { Controller } from '@/ts/controller';
-import { Spin, message } from 'antd';
+import { Spin } from 'antd';
 import ThingView from './detail';
 import History from './history';
 import BillHistory from './billHistory';
 import useAsyncLoad from '@/hooks/useAsyncLoad';
-import { Theme } from '@/config/theme';
+// import { Theme } from '@/config/theme';
 
 interface IProps {
   form: IForm;
@@ -59,7 +59,7 @@ const FormView: React.FC<IProps> = ({ form, finished }) => {
               />
             );
           default:
-            //默认视图
+            //默认卡片视图
             return (
               <ThingView
                 form={form}
@@ -112,31 +112,31 @@ const FormView: React.FC<IProps> = ({ form, finished }) => {
               },
             ],
           }}
-          dataMenus={{
-            items: [
-              {
-                key: 'createNFT',
-                label: '生成存证',
-                icon: <ImTicket fontSize={22} color={Theme.FocusColor} />,
-                onClick: () => {
-                  message.success('存证成功!');
-                },
-              },
-              {
-                key: 'copyBoard',
-                label: '复制数据',
-                icon: <ImCopy fontSize={22} color={Theme.FocusColor} />,
-              },
-              {
-                key: 'startWork',
-                label: '发起办事',
-                icon: <ImShuffle fontSize={22} color={Theme.FocusColor} />,
-              },
-            ],
-            onMenuClick(_key, _data) {
-              // console.log(key, data);
-            },
-          }}
+          // dataMenus={{
+          //   items: [
+          //     {
+          //       key: 'createNFT',
+          //       label: '生成存证',
+          //       icon: <ImTicket fontSize={22} color={Theme.FocusColor} />,
+          //       onClick: () => {
+          //         message.success('存证成功!');
+          //       },
+          //     },
+          //     {
+          //       key: 'copyBoard',
+          //       label: '复制数据',
+          //       icon: <ImCopy fontSize={22} color={Theme.FocusColor} />,
+          //     },
+          //     {
+          //       key: 'startWork',
+          //       label: '发起办事',
+          //       icon: <ImShuffle fontSize={22} color={Theme.FocusColor} />,
+          //     },
+          //   ],
+          //   onMenuClick(_key, _data) {
+          //     // console.log(key, data);
+          //   },
+          // }}
         />
       );
     };

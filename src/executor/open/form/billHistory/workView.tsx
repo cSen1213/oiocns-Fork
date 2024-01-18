@@ -55,7 +55,6 @@ const TaskView: React.FC<taskViewType> = ({ instance }) => {
     });
     instanceList.push(...instanceItems);
   });
-  console.log('信息', task, instance, instanceList);
   const columns = [
     {
       title: '单位名称',
