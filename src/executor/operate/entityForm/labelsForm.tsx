@@ -93,6 +93,19 @@ const LabelsForm = (props: Iprops) => {
         rules: [{ required: true, message: '类型为必填项' }],
       },
     },
+    {
+      title: '查看方式',
+      dataIndex: 'openType',
+      valueType: 'select',
+      fieldProps: {
+        options: ['卡片', '事项', '关联事项'].map((i) => {
+          return {
+            value: i,
+            label: i,
+          };
+        }),
+      },
+    },
   ];
   if (readonly) {
     columns.push(...EntityColumns(props.current!.metadata));
