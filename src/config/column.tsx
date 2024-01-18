@@ -160,7 +160,7 @@ export const FullEntityColumns = (fields: model.FieldModel[]) => {
       valueType: '描述型',
       remark: '描述信息',
       options: {
-        visible: true,
+        visible: false,
       },
     },
     {
