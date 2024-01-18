@@ -1,11 +1,12 @@
 import { Card, Tabs } from 'antd';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ImUndo2 } from 'react-icons/im';
 import { IForm } from '@/ts/core';
 import { schema } from '@/ts/base';
 import WorkFormViewer from '@/components/DataStandard/WorkForm/Viewer';
 import ThingArchive from '../detail/archive';
 import TaskView from './taskView';
+import { kernel } from '@/ts/base';
 interface IProps {
   form: IForm;
   thingData: schema.XThing;
@@ -17,8 +18,9 @@ interface IProps {
  * @returns
  */
 const ThingView: React.FC<IProps> = (props) => {
-  const hasDoneTasks = Object.values(props.thingData.archives);
+  console.log('物-查看', props);
 
+  const hasDoneTasks = Object.values(props.thingData.archives);
   const convertData = () => {
     let data: any = {};
     for (let [key, value] of Object.entries(props.thingData)) {
@@ -29,6 +31,24 @@ const ThingView: React.FC<IProps> = (props) => {
     }
     return data;
   };
+
+  /** 加载主表ID */
+  const loadMasterId = async () => {
+    const masterIdRes = await kernel.loadMasterId(
+      props.form.belongId,
+      props.thingData.RECID,
+    );
+    if (masterIdRes.code === 200 && masterIdRes.data.length > 0) {
+      loadMasterInstance(masterIdRes.data[0].MASTERID);
+    }
+  };
+
+  /** 加载流程数据 */
+  const loadMasterInstance = async (masterid: string) => {
+    const instanceRes = await kernel.loadMasterInstance(props.form.belongId, masterid);
+    console.log('instanceRes', instanceRes);
+  };
+
   return (
     <Card>
       <Tabs
@@ -55,9 +75,13 @@ const ThingView: React.FC<IProps> = (props) => {
             children: (
               <TaskView
                 title="转化信息"
-                instance={hasDoneTasks.find(
-                  (taskItem) => taskItem.defineId === '535193248780660736',
-                )}
+                instance={
+                  hasDoneTasks.length > 0
+                    ? hasDoneTasks.find(
+                        (taskItem) => taskItem.defineId === '535193248780660736',
+                      )
+                    : loadMasterId()
+                }
                 formId="535176818869813249"
               />
             ),
@@ -95,9 +119,9 @@ const ThingView: React.FC<IProps> = (props) => {
               <TaskView
                 title="赋权信息"
                 instance={hasDoneTasks.find(
-                  (taskItem) => taskItem.defineId === '535193248780660736',
+                  (taskItem) => taskItem.defineId === '535193499293855744',
                 )}
-                formId="535176818869813249"
+                formId="535176821000519681"
               />
             ),
           },
