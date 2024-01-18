@@ -99,6 +99,20 @@ class IndexController extends Controller {
     return files;
   }
 
+  /** 读取安心屋的配置文件 */
+  async loadAxwConfigDir(): Promise<IDirectory[]> {
+    const directorys: IDirectory[] = [];
+    // 安心屋工作台配置标准
+    for (const directory of this.targets
+      .filter((i) => i.session.isMyChat)
+      .map((a) => a.directory)) {
+      directorys.push(...(await directory.loadAllDirectorys()));
+    }
+    return directorys.filter(
+      (i) => i.code === 'AXWCONFIG' && i.name === '安心屋工作台配置标准',
+    );
+  }
+
   /** 加载安心屋所有目录 */
   async loadAxwDirectorys(): Promise<IDirectory[]> {
     const directorys: IDirectory[] = [];
@@ -136,6 +150,7 @@ class IndexController extends Controller {
     }
     return chats;
   }
+
   /** 所有相关页面 */
   async loadPages(): Promise<IPageTemplate[]> {
     const pages: IPageTemplate[] = [];
