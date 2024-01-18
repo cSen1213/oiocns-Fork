@@ -1,10 +1,16 @@
 import React from 'react';
 import './index.less';
-
+import { exportPDF } from '@/utils/exportPDF';
 const Index: React.FC = () => {
+  const arr = Array.from({ length: 100 }, (v, k) => k);
   return (
-    <div className="privacy_wrap">
-      <h3>奥集能 隐私政策</h3>
+    <div className="privacy_wrap" id="aa">
+      <h3 onClick={() => exportPDF('cc', '哈哈哈哈哈')}>奥集能 隐私政策</h3>
+      <ul className={'aa'} id="cc">
+        {arr.map((v, k) => (
+          <li key={k}>{k}</li>
+        ))}
+      </ul>
       <div>本政策仅适用于奥集能产品或服务。最近更新日期：2023年01月01日。</div>
       <div>
         奥集能尊重并保护所有使用服务用户的个人隐私权。为了给您提供更准确、更有个性化的服务，奥集能会按照本隐私权政策的规定使用和披露您的个人信息。但我们将以高度的勤勉、审慎义务对待这些信息。除本隐私权政策另有规定外，在未征得您事先许可的情况下，奥集能不会将这些信息对外披露或向第三方提供。我们会不时更新本隐私权政策。您在同意本软件服务使用协议之时，即视为您已经同意本隐私权政策全部内容。本隐私权政策属于本软件服务使用协议不可分割的一部分。
