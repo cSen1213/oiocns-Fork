@@ -56,7 +56,7 @@ export default defineElement({
         const axwDriectorys = await orgCtrl.loadAxwDirectorys();
         const axwApplications = await orgCtrl.loadApplications();
         const promises = dataSource?.map(async (item) => {
-          const finds: IFile[] = [];
+          const finds: any[] = [];
           await Promise.all(
             item.content.map(async (ite) => {
               const findDirRes = axwDriectorys.find((ita) => ita.id === ite.directoryID);
@@ -66,14 +66,22 @@ export default defineElement({
               if (ite.applicationID) {
                 if (findAppRes) {
                   if (await findAppRes.loadContent()) {
-                    finds.push(findAppRes?.content().find((i) => i.id === ite.id)!);
+                    finds.push(
+                      Object.assign(findAppRes.content().find((i) => i.id === ite.id)!, {
+                        aliasName: ite.aliasName || '',
+                      }),
+                    );
                   }
                 }
               }
               if (ite.directoryID) {
                 if (findDirRes) {
                   if (await findDirRes.loadContent()) {
-                    finds.push(findDirRes.content().find((i) => i.id === ite.id)!);
+                    finds.push(
+                      Object.assign(findDirRes.content().find((i) => i.id === ite.id)!, {
+                        aliasName: ite.aliasName || '',
+                      }),
+                    );
                   }
                 }
               }
@@ -109,7 +117,7 @@ export default defineElement({
         }
       }, [dataSource]);
 
-      const loadCommonCard = (item: IFile) => (
+      const loadCommonCard = (item: any) => (
         <div
           className="appCard"
           style={{ display: 'flex', flexDirection: 'column', height: '100px' }}
@@ -123,7 +131,7 @@ export default defineElement({
               width: '100px',
               textAlign: 'center',
             }}>
-            {item?.name}
+            {item?.aliasName || item?.name}
           </div>
         </div>
       );

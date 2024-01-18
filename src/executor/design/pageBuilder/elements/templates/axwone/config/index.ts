@@ -7,6 +7,7 @@
  * name // 分组内容的名称
  * applicationID // 应用ID
  * applicationname // 应用名称
+ * aliasName // 展示别名
  */
 
 const AXWPORTALID: AXWType[] = [
@@ -106,6 +107,7 @@ export type AXWType = {
     directoryName?: string;
     applicationID?: string;
     applicationName?: string;
+    aliasName?: string;
   }[];
 };
 
