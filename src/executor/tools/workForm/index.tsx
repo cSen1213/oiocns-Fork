@@ -7,6 +7,7 @@ import { formatDate } from '@/utils';
 import { getNodeByNodeId } from '@/utils/tools';
 import useObjectUpdate from '@/hooks/useObjectUpdate';
 import { logger } from '@/ts/base/common/logger';
+import { Button } from 'antd';
 
 interface IWorkFormProps {
   allowEdit: boolean;
@@ -218,9 +219,14 @@ const WorkForm: React.FC<IWorkFormProps> = (props) => {
       setChangedFields(refreshFields);
     }
   };
-
+  const printPDF = () => {
+    console.log('printPDF', node, props.data);
+  };
   return (
-    <div style={{ padding: 10 }} key={key}>
+    <div className="work-wrap" style={{ padding: 10 }} key={key}>
+      <div className="work-extra-btns">
+        <Button onClick={() => printPDF()}>打印</Button>
+      </div>
       {node.primaryForms && node.primaryForms.length > 0 && (
         <PrimaryForms
           {...props}
