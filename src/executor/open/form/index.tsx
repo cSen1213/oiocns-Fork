@@ -35,13 +35,15 @@ const FormView: React.FC<IProps> = ({ form, finished }) => {
       new Controller(form.key),
     );
     const [totalCount, setTotalCount] = useState(0);
-
     useEffect(() => {
       if (form.id === '535176818458771457') {
         config.loadCohortMembers().then((res) => {
           res && refreshMenu(res);
         });
       }
+      return () => {
+        setTotalCount(0);
+      };
     }, []);
     if (!selectMenu || !rootMenu) return <></>;
     const loadContent = () => {
@@ -79,75 +81,75 @@ const FormView: React.FC<IProps> = ({ form, finished }) => {
         }
       }
       return (
-        <>
-          <GenerateThingTable
-            key={form.key}
-            height={'100%'}
-            fields={form.fields}
-            scrolling={{
-              mode: 'infinite',
-              showScrollbar: 'onHover',
-            }}
-            pager={{
-              visible: form.id === '535176818458771457',
-              showInfo: true,
-              infoText: '总计: ' + totalCount + ' 个',
-            }}
-            onRowDblClick={(e: any) => setSelcet(e.data)}
-            filterValue={filterExp}
-            dataSource={
-              new CustomStore({
-                key: 'id',
-                async load(loadOptions: any) {
-                  if ((filterExp && filterExp.length > 0) || labels.length > 0) {
-                    loadOptions.userData = labels.map((a) => a.value);
-                    if (selectMenu.key !== selectedKey) {
-                      loadOptions.skip = 0;
-                      selectedKey = selectMenu.key;
-                    }
-
-                    if (selectMenu.itemType === '集群单位' && selectMenu.item.id) {
-                      loadOptions = {
-                        ...loadOptions,
-                        options: {
-                          match: { belongId: selectMenu.item.id },
-                          requireTotalCount: true,
-                        },
-                      };
-                    } else if (selectMenu.item?.value) {
-                      loadOptions.userData.push(selectMenu.item.value);
-                    } else if (selectMenu.item?.code) {
-                      loadOptions.userData.push(selectMenu.item.code);
-                    }
-
-                    const res = await form.loadThing({
-                      ...loadOptions,
-                      requireTotalCount: true,
-                    });
-
-                    setTotalCount(res.totalCount);
-                    return res;
+        <GenerateThingTable
+          key={form.key}
+          height={'100%'}
+          fields={form.fields}
+          scrolling={{
+            mode: 'infinite',
+            showScrollbar: 'onHover',
+          }}
+          pager={{
+            visible: form.id === '535176818458771457',
+            showInfo: true,
+            infoText: '总计: ' + totalCount + ' 个',
+          }}
+          onRowDblClick={(e: any) => setSelcet(e.data)}
+          filterValue={filterExp}
+          dataSource={
+            new CustomStore({
+              key: 'id',
+              async load(loadOptions: any) {
+                if ((filterExp && filterExp.length > 0) || labels.length > 0) {
+                  loadOptions.userData = labels.map((a) => a.value);
+                  if (selectMenu.key !== selectedKey) {
+                    loadOptions.skip = 0;
                   }
-                  return { data: [], success: true, totalCount: 0, groupCount: 0 };
-                },
-              })
-            }
-            remoteOperations={true}
-            toolbar={{
-              visible: true,
-              items: [
-                {
-                  name: 'columnChooserButton',
-                  location: 'after',
-                },
-                {
-                  name: 'searchPanel',
-                  location: 'after',
-                },
-              ],
-            }}
-          />
-        </>
+
+                  if (selectMenu.itemType === '集群单位' && selectMenu.item.id) {
+                    loadOptions = {
+                      ...loadOptions,
+                      options: {
+                        match: { belongId: selectMenu.item.id },
+                      },
+                    };
+                  } else if (selectMenu.item?.value) {
+                    loadOptions.userData.push(selectMenu.item.value);
+                  } else if (selectMenu.item?.code) {
+                    loadOptions.userData.push(selectMenu.item.code);
+                  }
+
+                  const res = await form.loadThing({
+                    ...loadOptions,
+                    requireTotalCount: true,
+                  });
+
+                  if (loadOptions.skip == 0 && form.id === '535176818458771457') {
+                    setTotalCount(res.totalCount);
+                    selectedKey = selectMenu.key;
+                  }
+
+                  return res;
+                }
+                return { data: [], success: true, totalCount: 0, groupCount: 0 };
+              },
+            })
+          }
+          remoteOperations={true}
+          toolbar={{
+            visible: true,
+            items: [
+              {
+                name: 'columnChooserButton',
+                location: 'after',
+              },
+              {
+                name: 'searchPanel',
+                location: 'after',
+              },
+            ],
+          }}
+        />
       );
     };
     return (
