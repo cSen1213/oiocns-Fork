@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import FullScreenModal from '@/components/Common/fullScreen';
 import { IForm } from '@/ts/core';
 import * as config from './config';
@@ -21,7 +21,7 @@ interface IProps {
   form: IForm;
   finished: () => void;
 }
-
+let selectedKey: string = '';
 /** 表单查看 */
 const FormView: React.FC<IProps> = ({ form, finished }) => {
   const [select, setSelcet] = useState();
@@ -30,10 +30,19 @@ const FormView: React.FC<IProps> = ({ form, finished }) => {
   const filterExp: any[] = JSON.parse(dataRange?.filterExp ?? '[]');
   const labels = dataRange?.labels ?? [];
   const FormBrower: React.FC = () => {
-    const [, rootMenu, selectMenu, setSelectMenu] = useMenuUpdate(
+    const [, rootMenu, selectMenu, setSelectMenu, refreshMenu] = useMenuUpdate(
       () => config.loadSpeciesItemMenu(form),
       new Controller(form.key),
     );
+    const [totalCount, setTotalCount] = useState(0);
+
+    useEffect(() => {
+      if (form.id === '535176818458771457') {
+        config.loadCohortMembers().then((res) => {
+          res && refreshMenu(res);
+        });
+      }
+    }, []);
     if (!selectMenu || !rootMenu) return <></>;
     const loadContent = () => {
       if (select) {
@@ -70,74 +79,75 @@ const FormView: React.FC<IProps> = ({ form, finished }) => {
         }
       }
       return (
-        <GenerateThingTable
-          key={form.key}
-          height={'100%'}
-          fields={form.fields}
-          scrolling={{
-            mode: 'infinite',
-            showScrollbar: 'onHover',
-          }}
-          pager={{ visible: false }}
-          onRowDblClick={(e: any) => setSelcet(e.data)}
-          filterValue={filterExp}
-          dataSource={
-            new CustomStore({
-              key: 'id',
-              async load(loadOptions) {
-                if ((filterExp && filterExp.length > 0) || labels.length > 0) {
-                  loadOptions.userData = labels.map((a) => a.value);
-                  if (selectMenu.item?.value) {
-                    loadOptions.userData.push(selectMenu.item.value);
-                  } else if (selectMenu.item?.code) {
-                    loadOptions.userData.push(selectMenu.item.code);
+        <>
+          <GenerateThingTable
+            key={form.key}
+            height={'100%'}
+            fields={form.fields}
+            scrolling={{
+              mode: 'infinite',
+              showScrollbar: 'onHover',
+            }}
+            pager={{
+              visible: form.id === '535176818458771457',
+              showInfo: true,
+              infoText: '总计: ' + totalCount + ' 个',
+            }}
+            onRowDblClick={(e: any) => setSelcet(e.data)}
+            filterValue={filterExp}
+            dataSource={
+              new CustomStore({
+                key: 'id',
+                async load(loadOptions: any) {
+                  if ((filterExp && filterExp.length > 0) || labels.length > 0) {
+                    loadOptions.userData = labels.map((a) => a.value);
+                    if (selectMenu.key !== selectedKey) {
+                      loadOptions.skip = 0;
+                      selectedKey = selectMenu.key;
+                    }
+
+                    if (selectMenu.itemType === '集群单位' && selectMenu.item.id) {
+                      loadOptions = {
+                        ...loadOptions,
+                        options: {
+                          match: { belongId: selectMenu.item.id },
+                          requireTotalCount: true,
+                        },
+                      };
+                    } else if (selectMenu.item?.value) {
+                      loadOptions.userData.push(selectMenu.item.value);
+                    } else if (selectMenu.item?.code) {
+                      loadOptions.userData.push(selectMenu.item.code);
+                    }
+
+                    const res = await form.loadThing({
+                      ...loadOptions,
+                      requireTotalCount: true,
+                    });
+
+                    setTotalCount(res.totalCount);
+                    return res;
                   }
-                  return await form.loadThing(loadOptions);
-                }
-                return { data: [], success: true, totalCount: 0, groupCount: 0 };
-              },
-            })
-          }
-          remoteOperations={true}
-          toolbar={{
-            visible: true,
-            items: [
-              {
-                name: 'columnChooserButton',
-                location: 'after',
-              },
-              {
-                name: 'searchPanel',
-                location: 'after',
-              },
-            ],
-          }}
-          // dataMenus={{
-          //   items: [
-          //     {
-          //       key: 'createNFT',
-          //       label: '生成存证',
-          //       icon: <ImTicket fontSize={22} color={Theme.FocusColor} />,
-          //       onClick: () => {
-          //         message.success('存证成功!');
-          //       },
-          //     },
-          //     {
-          //       key: 'copyBoard',
-          //       label: '复制数据',
-          //       icon: <ImCopy fontSize={22} color={Theme.FocusColor} />,
-          //     },
-          //     {
-          //       key: 'startWork',
-          //       label: '发起办事',
-          //       icon: <ImShuffle fontSize={22} color={Theme.FocusColor} />,
-          //     },
-          //   ],
-          //   onMenuClick(_key, _data) {
-          //     // console.log(key, data);
-          //   },
-          // }}
-        />
+                  return { data: [], success: true, totalCount: 0, groupCount: 0 };
+                },
+              })
+            }
+            remoteOperations={true}
+            toolbar={{
+              visible: true,
+              items: [
+                {
+                  name: 'columnChooserButton',
+                  location: 'after',
+                },
+                {
+                  name: 'searchPanel',
+                  location: 'after',
+                },
+              ],
+            }}
+          />
+        </>
       );
     };
     return (

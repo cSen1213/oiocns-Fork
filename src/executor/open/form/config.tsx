@@ -2,7 +2,7 @@ import { MenuItemType } from 'typings/globelType';
 import { IForm } from '@/ts/core';
 import React from 'react';
 import EntityIcon from '@/components/Common/GlobalComps/entityIcon';
-import { model } from '@/ts/base';
+import { kernel, model } from '@/ts/base';
 import { XEntity } from '@/ts/base/schema';
 /** 创建选择字段菜单 */
 const buildSpeciesFiledsTree = (fields: model.FieldModel[]): MenuItemType[] => {
@@ -67,7 +67,40 @@ const buildSpeciesItemsTree = (
   }
   return result;
 };
+export const loadCohortMembers = async (): Promise<any> => {
+  const res = await kernel.querySubTargetById({
+    id: '464369144951869440',
+    subTypeNames: ['单位', '医院', '大学'],
+    page: {
+      offset: 0,
+      limit: 2000,
+      filter: '',
+    },
+  });
+  if (res.success && res.data.total > 0) {
+    return {
+      children: res.data.result.map((item) => {
+        return {
+          children: [],
+          icon: undefined,
+          itemType: '集群单位',
+          key: item.id,
+          item,
+          label: item.name,
+        };
+      }),
+      icon: undefined,
+      item: {
+        name: '浙江省职务科技成果转化组织群',
+      },
+      itemType: 'Tab',
+      key: '123',
+      label: '浙江省职务科技成果转化组织群',
+    };
+  }
 
+  return;
+};
 /** 加载表单分类菜单 */
 export const loadSpeciesItemMenu = (form: IForm): MenuItemType => {
   const SpeciesFields = form.fields.filter((i) => i.options?.species);

@@ -31,6 +31,10 @@ const CustomMenu = (props: CustomMenuType) => {
     return result;
   };
   const loopFilterTree = (data: MenuItemType[]) => {
+    if (data[0]?.itemType === '集群单位') {
+      return data;
+    }
+
     const result: any[] = [];
     for (const item of data) {
       const newItem = { ...item };

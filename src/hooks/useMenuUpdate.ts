@@ -18,16 +18,23 @@ const useMenuUpdate = (
   MenuItemType | undefined,
   MenuItemType | undefined,
   (item: MenuItemType) => void,
+  (item?: MenuItemType) => void,
 ] => {
   const [key, setKey] = useState<string>('');
   const [rootMenu, setRootMenu] = useState<MenuItemType>();
   const [selectMenu, setSelectMenu] = useState<MenuItemType>();
   const ctrl = controller || orgCtrl;
-
+  const [defaultMenu, setdefaultMenu] = useState<MenuItemType>();
   /** 刷新菜单 */
-  const refreshMenu = () => {
+  const refreshMenu = (defData?: any) => {
     setKey(generateUuid());
-    const newMenus = loadMenu();
+    let newMenus = loadMenu();
+    if (defData?.key) {
+      setdefaultMenu(defData);
+      newMenus.children.push(defData);
+    } else if (defaultMenu) {
+      newMenus.children.push(defaultMenu);
+    }
     var item = findMenuItemByKey(newMenus, ctrl.currentKey);
     if (item === undefined) {
       item = newMenus;
@@ -56,7 +63,7 @@ const useMenuUpdate = (
       ctrl.unsubscribe(id);
     };
   }, []);
-  return [key, rootMenu, selectMenu, onSelectMenu];
+  return [key, rootMenu, selectMenu, onSelectMenu, refreshMenu];
 };
 
 export default useMenuUpdate;
