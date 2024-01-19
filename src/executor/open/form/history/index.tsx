@@ -1,5 +1,5 @@
 import { Card, Tabs } from 'antd';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import orgCtrl from '@/ts/controller';
 import { ImUndo2 } from 'react-icons/im';
 import { IForm } from '@/ts/core';
@@ -22,8 +22,11 @@ interface IProps {
 const ThingView: React.FC<IProps> = (props) => {
   const [curentInstance, setCurentInstance] = useState<any[]>([]); // 迁移数据实例
   const [fields, setFields] = useState<model.FieldModel[]>([]); // 表单字段
+  const [conversionMasterId, setConversionMasterId] = useState<string>(''); // 转化信息 MasterId
+
   const hasDoneTasks = Object.values(props.thingData.archives);
   const isTransferHistory = hasDoneTasks.length === 0; // 是否为成果迁移历史数据
+
   const convertData = () => {
     let data: any = {};
     for (let [key, value] of Object.entries(props.thingData)) {
@@ -39,7 +42,13 @@ const ThingView: React.FC<IProps> = (props) => {
   const getMasterId = async (masterOptions: any, filterOptions: string[]) => {
     const masterIdRes = await kernel.loadMasterId(props.form.belongId, masterOptions);
     if (masterIdRes.code === 200 && masterIdRes.data.length > 0) {
+      // 如果为转化信息表 那么收集这个MasterId
+      if (masterOptions.match.name === '选择成果（成果转化）') {
+        setConversionMasterId(masterIdRes.data[0].MASTERID);
+      }
       loadMasterInstance(masterIdRes.data[0].MASTERID, filterOptions);
+    } else {
+      setCurentInstance([]);
     }
   };
 
@@ -52,18 +61,23 @@ const ThingView: React.FC<IProps> = (props) => {
     );
     if (instanceRes.code === 200 && instanceRes.data.length > 0) {
       setCurentInstance(instanceRes.data);
+    } else {
+      setCurentInstance([]);
     }
   };
 
-  /** 加载表单字段 */
-  const loadFields = async (filterFormInfo: string) => {
-    const axwDriectorys = await orgCtrl.loadAxwDirectorys();
-    // 转化目录
-    const conversion = axwDriectorys.find((a) => a.id === '535176817745739777');
-    if (conversion) {
-      if (await conversion.loadContent(true)) {
-        const conversionData = conversion.content();
-        const fieldsData: IForm = conversionData.find(
+  /**
+   *  加载表单字段
+   * directoryId: 目录ID
+   * filterFormInfo: 表字段的过滤条件
+   * */
+  const loadFields = async (directoryId: string, filterFormInfo: string) => {
+    const allDriectorys = await orgCtrl.loadAxwDirectorys();
+    const curentDirectory = allDriectorys.find((a) => a.id === directoryId);
+    if (curentDirectory) {
+      if (await curentDirectory.loadContent(true)) {
+        const curentData = curentDirectory.content();
+        const fieldsData: IForm = curentData.find(
           (a) => a.name === filterFormInfo,
         ) as IForm;
         if (fieldsData) {
@@ -73,21 +87,78 @@ const ThingView: React.FC<IProps> = (props) => {
     }
   };
 
+  /** 如果为历史迁移数据，初始化时加载必要数据 */
+  useEffect(() => {
+    if (isTransferHistory) {
+      getMasterId(
+        {
+          match: {
+            name: '选择成果（成果转化）',
+            ZLID: props.thingData.RECID,
+          },
+        },
+        ['转化信息'],
+      );
+    }
+  }, [isTransferHistory]);
+
   /** tabs页切换事件 */
   const onTabsChange = (key: string) => {
     if (hasDoneTasks.length === 0) {
+      setCurentInstance([]);
+      setFields([]);
       // RECID 职务成果ID
-      if (key === '2') {
-        getMasterId(
-          {
-            match: {
-              name: '选择成果（成果转化）',
-              ZLID: props.thingData.RECID,
+      switch (key) {
+        case '2':
+          getMasterId(
+            {
+              match: {
+                name: '选择成果（成果转化）',
+                ZLID: props.thingData.RECID,
+              },
             },
-          },
-          ['转化信息'],
-        );
-        loadFields('转化信息');
+            ['转化信息'],
+          );
+          loadFields('535176817745739777', '转化信息');
+          break;
+        case '3':
+          getMasterId(
+            {
+              match: {
+                name: '转化合同登记',
+                CGZHRECID: conversionMasterId,
+              },
+            },
+            ['转化合同登记'],
+          );
+          loadFields('535176818005786625', '转化合同登记');
+          break;
+        case '4':
+          getMasterId(
+            {
+              match: {
+                name: '收益分配登记',
+                CGZHRECID: conversionMasterId,
+              },
+            },
+            ['收益分配登记'],
+          );
+          loadFields('535176818379079681', '收益分配登记');
+          break;
+        case '5':
+          getMasterId(
+            {
+              match: {
+                name: '选择成果（成果赋权）', // 从哪张表里查找MasterId
+                ZLID: props.thingData.RECID, // 通过职务成果ID查找专利ID
+              },
+            },
+            ['选择成果（成果赋权）'], // 被查找的数据所在的表
+          );
+          loadFields('535176817938677761', '选择成果（成果赋权）'); // 被查找的数据的表的所在目录 和这个表的名称
+          break;
+        default:
+          break;
       }
     }
   };
@@ -140,39 +211,69 @@ const ThingView: React.FC<IProps> = (props) => {
             key: '3',
             label: `合同信息`,
             children: (
-              <TaskView
-                title="合同信息"
-                instance={hasDoneTasks.find(
-                  (taskItem) => taskItem.defineId === '535193248780660736',
+              <>
+                {isTransferHistory ? (
+                  <HistoryView
+                    title="合同信息"
+                    fields={fields}
+                    instance={curentInstance}
+                  />
+                ) : (
+                  <TaskView
+                    title="合同信息"
+                    instance={hasDoneTasks.find(
+                      (taskItem) => taskItem.defineId === '535193248780660736',
+                    )}
+                    formId="535176818869813249"
+                  />
                 )}
-                formId="535176818869813249"
-              />
+              </>
             ),
           },
           {
             key: '4',
             label: `收益分配信息`,
             children: (
-              <TaskView
-                title="收益分配信息"
-                instance={hasDoneTasks.find(
-                  (taskItem) => taskItem.defineId === '535193248780660736',
+              <>
+                {isTransferHistory ? (
+                  <HistoryView
+                    title="收益分配信息"
+                    fields={fields}
+                    instance={curentInstance}
+                  />
+                ) : (
+                  <TaskView
+                    title="收益分配信息"
+                    instance={hasDoneTasks.find(
+                      (taskItem) => taskItem.defineId === '535193248780660736',
+                    )}
+                    formId="535176818869813249"
+                  />
                 )}
-                formId="535176818869813249"
-              />
+              </>
             ),
           },
           {
             key: '5',
             label: `赋权信息`,
             children: (
-              <TaskView
-                title="赋权信息"
-                instance={hasDoneTasks.find(
-                  (taskItem) => taskItem.defineId === '535193499293855744',
+              <>
+                {isTransferHistory ? (
+                  <HistoryView
+                    title="赋权信息"
+                    fields={fields}
+                    instance={curentInstance}
+                  />
+                ) : (
+                  <TaskView
+                    title="赋权信息"
+                    instance={hasDoneTasks.find(
+                      (taskItem) => taskItem.defineId === '535193499293855744',
+                    )}
+                    formId="535176821000519681"
+                  />
                 )}
-                formId="535176821000519681"
-              />
+              </>
             ),
           },
           {

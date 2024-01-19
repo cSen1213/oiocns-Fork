@@ -17,7 +17,7 @@ const TaskView: React.FC<taskViewType> = ({ title, instance, fields }) => {
     orgCtrl.user.companys.find((a) => a.id == instance[0]?.belongId) || orgCtrl.user;
 
   useEffect(() => {
-    if (instance.length > 0) {
+    if (instance.length > 0 && fields.length > 0) {
       const findThing = instance[0];
       const [enObj] = filterKeys(findThing);
       /* 去除办事数据 */
@@ -33,8 +33,10 @@ const TaskView: React.FC<taskViewType> = ({ title, instance, fields }) => {
         }
       });
       setData({ ...enObj, ...newData });
+    } else {
+      setData([] as any);
     }
-  }, [instance.length]);
+  }, [instance, fields]);
 
   if (!data) {
     return <></>;
