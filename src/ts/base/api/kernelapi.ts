@@ -1158,7 +1158,7 @@ export default class KernelApi {
    */
   public async loadMasterId(
     belongId: string,
-    recid: string, // 职务成果ID
+    options: any,
   ): Promise<model.LoadResult<schema.XThing[]>> {
     const res = await this.dataProxy({
       module: 'Collection',
@@ -1172,10 +1172,7 @@ export default class KernelApi {
         requireTotalCount: true,
         userData: [],
         options: {
-          match: {
-            name: '选择成果（成果转化）',
-            ZLID: recid, //刚才拿到的职务成果的RECID
-          },
+          ...options,
         },
         belongId: belongId,
         collName: '_system-things',
@@ -1196,6 +1193,7 @@ export default class KernelApi {
   public async loadMasterInstance(
     belongId: string,
     masterid: string, // 主表ID
+    options: any,
   ): Promise<model.LoadResult<schema.XThing[]>> {
     const res = await this.dataProxy({
       module: 'Collection',
@@ -1211,15 +1209,7 @@ export default class KernelApi {
         options: {
           match: {
             name: {
-              _in_: [
-                '转化信息',
-                '选择成果（成果转化）',
-                '上传附件',
-                '定价/收益方式确定',
-                '意向受让方',
-                '团队内部收益分配',
-                '分配比例',
-              ],
+              _in_: options,
             },
             MASTERID: masterid, //刚才拿到的主表的MASTERID
           },

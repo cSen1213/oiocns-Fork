@@ -11,8 +11,6 @@ interface taskViewType {
   formId: string; //待查看的表单id
 }
 const TaskView: React.FC<taskViewType> = ({ title, instance, formId }) => {
-  console.log('打印taskView', instance, formId);
-  const [task, setTask] = useState<schema.XWorkTask[]>();
   const [data, setData] = useState<InstanceDataModel>();
   const belong =
     orgCtrl.user.companys.find((a) => a.id == instance.belongId) || orgCtrl.user;
@@ -24,12 +22,7 @@ const TaskView: React.FC<taskViewType> = ({ title, instance, formId }) => {
         instance.belongId,
       );
       if (detail) {
-        console.log('loadInstanceDetail', JSON.parse(detail.data || '{}'));
-
-        setTask(detail.tasks);
         setData(JSON.parse(detail.data || '{}'));
-
-        // console.log(detail.tasks, JSON.parse(detail.data || '{}').data[formId]);
       }
     }, 10);
   }, []);
@@ -55,7 +48,6 @@ const TaskView: React.FC<taskViewType> = ({ title, instance, formId }) => {
       };
     }),
   ].filter(Boolean);
-  console.log('流程信息', instanceList);
   return (
     <>
       {data && data.fields[formId] && (

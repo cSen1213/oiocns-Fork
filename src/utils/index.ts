@@ -213,6 +213,20 @@ function filterEmptyPropObj(obj: any) {
   return obj;
 }
 
+/** 处理对象的键 */
+function filterKeys<O extends { [key: string]: any }>(originObj: O): [any, any] {
+  let enObj: { [key: string]: any } = {};
+  let numberObj: { [key: string]: any } = {};
+  for (const objKey of Object.keys(originObj)) {
+    if (/[a-zA-Z]+$/.test(objKey)) {
+      enObj[objKey as string] = originObj[objKey];
+    } else if (/^\d+$/.test(objKey)) {
+      numberObj[objKey as string] = originObj[objKey];
+    }
+  }
+  return [enObj, numberObj];
+}
+
 /**
  * 递归访问整个树
  */
@@ -337,6 +351,7 @@ export {
   assignment,
   ellipsisText,
   filterEmptyPropObj,
+  filterKeys,
   formatDate,
   formatTimeAgo,
   getJsonText,
