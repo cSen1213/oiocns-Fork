@@ -9,6 +9,7 @@ import ThingArchive from '../detail/archive';
 import TaskView from './taskView';
 import HistoryView from './historyView';
 import { kernel } from '@/ts/base';
+import BaseForm from './baseForm';
 interface IProps {
   form: IForm;
   thingData: schema.XThing;
@@ -171,7 +172,7 @@ const ThingView: React.FC<IProps> = (props) => {
           {
             key: '1',
             label: `基本信息`,
-            children: (
+            children: isTransferHistory ? (
               <WorkFormViewer
                 readonly
                 rules={[]}
@@ -182,6 +183,8 @@ const ThingView: React.FC<IProps> = (props) => {
                 data={convertData()}
                 belong={props.form.directory.target.space}
               />
+            ) : (
+              <BaseForm instances={Object.values(props.thingData.archives)} />
             ),
           },
           {
