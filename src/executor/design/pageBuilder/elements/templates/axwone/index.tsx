@@ -152,7 +152,7 @@ export default defineElement({
             className="cardItem"
             style={{
               width:
-                title === '成果管理' ? '40%' : title === '合同收益管理' ? '30%' : '26%',
+                title === '成果管理' ? '40%' : title === '合同收益管理' ? '33%' : '26%',
               marginBottom: '20px',
             }}>
             <div className="cardItem-header">
