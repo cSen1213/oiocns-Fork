@@ -14,6 +14,7 @@ interface IWorkFormProps {
   belong: IBelong;
   nodeId: string;
   data: model.InstanceDataModel;
+  hidden?: boolean;
 }
 
 /** 流程节点表单 */
@@ -224,9 +225,11 @@ const WorkForm: React.FC<IWorkFormProps> = (props) => {
   };
   return (
     <div className="work-wrap" style={{ padding: 10 }} key={key}>
-      <div className="work-extra-btns">
-        <Button onClick={() => printPDF()}>打印</Button>
-      </div>
+      {!props.hidden && (
+        <div className="work-extra-btns">
+          <Button onClick={() => printPDF()}>打印</Button>
+        </div>
+      )}
       {node.primaryForms && node.primaryForms.length > 0 && (
         <PrimaryForms
           {...props}
@@ -238,7 +241,7 @@ const WorkForm: React.FC<IWorkFormProps> = (props) => {
           }}
         />
       )}
-      {node.detailForms && node.detailForms.length > 0 && (
+      {((node.detailForms && node.detailForms.length > 0) || props.hidden) && (
         <DetailForms
           {...props}
           changedFields={changedFields}
