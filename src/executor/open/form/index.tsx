@@ -37,7 +37,6 @@ const FormView: React.FC<IProps> = ({ form, finished }) => {
     );
     const [totalCount, setTotalCount] = useState(0);
     useEffect(() => {
-      console.log(form);
       //赋权-成果库-合同-转化信息-
       if (
         [

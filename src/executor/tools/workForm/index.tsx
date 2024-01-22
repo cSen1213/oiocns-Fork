@@ -14,7 +14,6 @@ interface IWorkFormProps {
   belong: IBelong;
   nodeId: string;
   data: model.InstanceDataModel;
-  viewFromId?: string; //仅展示此id的表单
 }
 
 /** 流程节点表单 */
@@ -221,6 +220,7 @@ const WorkForm: React.FC<IWorkFormProps> = (props) => {
   };
   const printPDF = () => {
     console.log('printPDF', node, props.data);
+    console.log('propsprops', props);
   };
   return (
     <div className="work-wrap" style={{ padding: 10 }} key={key}>

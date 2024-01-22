@@ -41,8 +41,6 @@ const ArchiveItem: React.FC<{ instance: schema.XWorkInstance }> = ({ instance })
       if (detail) {
         setTask(detail.tasks);
         setData(JSON.parse(detail.data || '{}'));
-
-        console.log(detail.tasks, JSON.parse(detail.data || '{}'));
       }
     }, 10);
   }, []);

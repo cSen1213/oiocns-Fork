@@ -13,7 +13,7 @@ interface taskViewType {
 const TaskView: React.FC<taskViewType> = ({ title, instance, formId }) => {
   const [data, setData] = useState<InstanceDataModel>();
   const belong =
-    orgCtrl.user.companys.find((a) => a.id == instance.belongId) || orgCtrl.user;
+    orgCtrl.user.companys.find((a) => a.id == instance?.belongId) || orgCtrl.user;
 
   useEffect(() => {
     setTimeout(async () => {
