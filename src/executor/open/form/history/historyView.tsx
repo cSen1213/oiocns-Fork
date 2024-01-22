@@ -60,7 +60,7 @@ const TaskView: React.FC<taskViewType> = ({ title, instance, fields }) => {
         renderItem={(_item, idx) => (
           <List.Item>
             <div style={{ display: 'flex' }} key={idx}>
-              <div style={{ paddingRight: '24px' }}>历史数据迁移，暂无流程信息</div>
+              <div style={{ paddingRight: '24px' }}></div>
             </div>
           </List.Item>
         )}
