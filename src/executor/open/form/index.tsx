@@ -136,9 +136,10 @@ const FormView: React.FC<IProps> = ({ form, finished }) => {
                     ...loadOptions,
                     requireTotalCount: true,
                   });
+
                   if (
-                    loadOptions.filter &&
-                    JSON.stringify(loadOptions.filter) !== filter
+                    loadOptions.userData.length > 0 &&
+                    JSON.stringify(loadOptions.userData) !== filter
                   ) {
                     setTotalCount(res.totalCount);
                     selectedKey = selectMenu.key;
