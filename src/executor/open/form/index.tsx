@@ -22,6 +22,7 @@ interface IProps {
   finished: () => void;
 }
 let selectedKey: string = '';
+let filter = '';
 /** 表单查看 */
 const FormView: React.FC<IProps> = ({ form, finished }) => {
   const [select, setSelcet] = useState();
@@ -36,12 +37,24 @@ const FormView: React.FC<IProps> = ({ form, finished }) => {
     );
     const [totalCount, setTotalCount] = useState(0);
     useEffect(() => {
-      if (form.id === '535176818458771457') {
+      console.log(form);
+      //赋权-成果库-合同-转化信息-
+      if (
+        [
+          '535176821000519681',
+          '535176818458771457',
+          '535176822128787457',
+          '535176818869813249',
+          '535176823366107137',
+        ].includes(form.id)
+      ) {
         config.loadCohortMembers().then((res) => {
           res && refreshMenu(res);
         });
       }
       return () => {
+        selectedKey = '';
+        filter = '';
         setTotalCount(0);
       };
     }, []);
@@ -90,7 +103,8 @@ const FormView: React.FC<IProps> = ({ form, finished }) => {
             showScrollbar: 'onHover',
           }}
           pager={{
-            visible: form.id === '535176818458771457',
+            // visible: form.id === '535176818458771457',
+            visible: true,
             showInfo: true,
             infoText: '总计: ' + totalCount + ' 个',
           }}
@@ -123,10 +137,13 @@ const FormView: React.FC<IProps> = ({ form, finished }) => {
                     ...loadOptions,
                     requireTotalCount: true,
                   });
-
-                  if (loadOptions.skip == 0 && form.id === '535176818458771457') {
+                  if (
+                    loadOptions.filter &&
+                    JSON.stringify(loadOptions.filter) !== filter
+                  ) {
                     setTotalCount(res.totalCount);
                     selectedKey = selectMenu.key;
+                    filter = JSON.stringify(loadOptions.filter);
                   }
 
                   return res;
