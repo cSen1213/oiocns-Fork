@@ -225,11 +225,11 @@ const WorkForm: React.FC<IWorkFormProps> = (props) => {
   };
   return (
     <div className="work-wrap" style={{ padding: 10 }} key={key}>
-      {!props.hidden && (
+      {/* {!props.hidden && (
         <div className="work-extra-btns">
           <Button onClick={() => printPDF()}>打印</Button>
         </div>
-      )}
+      )} */}
       {node.primaryForms && node.primaryForms.length > 0 && (
         <PrimaryForms
           {...props}
