@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Space, Spin } from 'antd';
+import { useHistory } from 'react-router-dom';
+import { Space, Spin, Button, Divider } from 'antd';
 import orgCtrl from '@/ts/controller';
 import { IFile } from '@/ts/core';
 import { command } from '@/ts/base';
@@ -7,8 +8,10 @@ import { kernel } from '@/ts/base';
 import EntityIcon from '@/components/Common/GlobalComps/entityIcon';
 import { defineElement } from '../../defineElement';
 import Transaction from '/img/transaction.png';
+import TypeIcon from '@/components/Common/GlobalComps/typeIcon';
 import cls from './index.module.less';
 import { AXWType } from './config/index';
+import { ImStack } from 'react-icons/im';
 
 type axwType = {
   title: string;
@@ -120,7 +123,12 @@ export default defineElement({
       const loadCommonCard = (item: any) => (
         <div
           className="appCard"
-          style={{ display: 'flex', flexDirection: 'column', height: '100px' }}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100px',
+            alignItems: 'center',
+          }}
           onClick={() => {
             command.emitter('executor', 'open', item);
           }}>
@@ -131,7 +139,8 @@ export default defineElement({
               width: '100px',
               textAlign: 'center',
             }}>
-            {item?.aliasName || item?.name}
+            {/* {item?.aliasName || item?.name} */}
+            {item?.name}
           </div>
         </div>
       );
@@ -142,8 +151,8 @@ export default defineElement({
           <div
             className="cardItem"
             style={{
-              width: '32%',
-              marginRight: '16px',
+              width:
+                title === '成果管理' ? '40%' : title === '合同收益管理' ? '30%' : '26%',
               marginBottom: '20px',
             }}>
             <div className="cardItem-header">
@@ -163,7 +172,7 @@ export default defineElement({
       };
 
       return (
-        <div className={cls.render_axw}>
+        <div>
           <Spin spinning={loading} tip={'加载中...'}>
             <div className="cardItem-viewer">
               <div
@@ -171,8 +180,7 @@ export default defineElement({
                 style={{
                   display: 'flex',
                   flexWrap: 'wrap',
-                  justifyContent: 'flex-start',
-                  padding: '12px',
+                  justifyContent: 'space-between',
                 }}>
                 {data.map((item: axwType) => {
                   return loadGroupItem(item.title, item.content);
@@ -183,11 +191,57 @@ export default defineElement({
         </div>
       );
     };
+    const history = useHistory();
+
+    // 操作组件
+    const RenderOperate = () => {
+      // 发送快捷命令
+      const renderCmdBtn = (cmd: string, title: string, iconType: string) => {
+        return (
+          <Button
+            className="linkBtn"
+            type="text"
+            icon={<TypeIcon iconType={iconType} size={18} />}
+            onClick={() => {
+              command.emitter('executor', cmd, orgCtrl.user);
+            }}>
+            {title}
+          </Button>
+        );
+      };
+      return (
+        <>
+          <div className="cardItem-header">
+            <span className={cls.title}>快捷操作</span>
+            <span className={cls.extraBtn} onClick={() => history.push('relation')}>
+              <ImStack /> <span>更多操作</span>
+            </span>
+          </div>
+          <div style={{ width: '100%', minHeight: 60 }} className="cardItem-viewer">
+            <Space wrap split={<Divider type="vertical" />} size={6}>
+              {renderCmdBtn('joinFriend', '添加好友', 'joinFriend')}
+              {renderCmdBtn('joinStorage', '申请存储', '存储资源')}
+              {renderCmdBtn('newCohort', '创建群组', '群组')}
+              {renderCmdBtn('joinCohort', '加入群聊', 'joinCohort')}
+              {renderCmdBtn('newCompany', '设立单位', '单位')}
+              {renderCmdBtn('joinCompany', '加入单位', 'joinCompany')}
+            </Space>
+          </div>
+        </>
+      );
+    };
 
     return (
       <div className={cls.axw_template}>
         <div className={cls.banner}>{props.banner?.({})}</div>
-        <RenderAxwInfo />
+        <div className={cls.render_axw}>
+          <div className="cardGroup">
+            <div style={{ minHeight: 80 }} className="cardItem">
+              <RenderOperate />
+            </div>
+          </div>
+          <RenderAxwInfo />
+        </div>
       </div>
     );
   },
@@ -200,6 +254,12 @@ export default defineElement({
         single: true,
         params: {},
         default: 'HeadBanner',
+      },
+      operate: {
+        label: '快捷操作',
+        single: true,
+        params: {},
+        default: 'Operate',
       },
     },
     type: 'Template',

@@ -118,8 +118,8 @@ class IndexController extends Controller {
     const directorys: IDirectory[] = [];
     for (const directory of this.targets
       .filter((i) => i.session.isMyChat)
-      // // 只要浙江省科学技术厅下的资源
-      // .filter((s) => s.belongId === '464368384847515648')
+      // 只要浙江省科学技术厅下的资源
+      .filter((s) => s.belongId === '464368384847515648')
       .map((a) => a.directory)) {
       directorys.push(...(await directory.loadAllDirectorys()));
     }
@@ -131,8 +131,8 @@ class IndexController extends Controller {
     const applications: IApplication[] = [];
     for (const application of this.targets
       .filter((i) => i.session.isMyChat)
-      // // 只要浙江省科学技术厅下的资源
-      // .filter((s) => s.belongId === '464368384847515648')
+      // 只要浙江省科学技术厅下的资源
+      .filter((s) => s.belongId === '464368384847515648')
       .map((a) => a.directory)) {
       applications.push(...(await application.loadAllApplication()));
     }
