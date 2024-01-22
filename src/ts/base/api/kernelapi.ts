@@ -1204,11 +1204,11 @@ export default class KernelApi {
       params: {
         skip: 0,
         take: 1000,
-        requireTotalCount: true,
         userData: [],
+        requireTotalCount: true,
         options: {
           match: {
-            name: {
+            labels: {
               _in_: options,
             },
             MASTERID: masterid, //刚才拿到的主表的MASTERID

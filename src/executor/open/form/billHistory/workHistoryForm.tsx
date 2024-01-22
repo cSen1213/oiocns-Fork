@@ -3,6 +3,7 @@ import orgCtrl from '@/ts/controller';
 import { common, model, schema } from '@/ts/base';
 import { IBelong, IForm } from '@/ts/core';
 import { Tabs } from 'antd';
+import { filterKeys } from '@/utils/index';
 import WorkFormViewer from '@/components/DataStandard/WorkForm/Viewer';
 // import PrimaryForms from './primary';
 // import DetailForms from './detail';
@@ -17,50 +18,54 @@ interface IWorkFormProps {
   data: any;
 }
 
+interface formType {
+  data: any;
+  fields: any[];
+}
+
 /** 流程节点表单 */
 const WorkHistoryForm: React.FC<IWorkFormProps> = (props) => {
-  console.log('WorkHistoryForm', props, props.data);
-
-  const [fields, setFields] = useState<model.FieldModel[]>([]); // 表单字段
   const [activeTabKey, setActiveTabKey] = useState(props.data[0].id);
+  const [primaryFormsData, setPrimaryFormsData] = useState<formType[]>([]); // 主表数据
+  const [detailFormsData, setDetailFormsData] = useState<formType[]>([]); // 子表数据
 
   /**
    *  加载表单字段
    * directoryId: 目录ID
    * filterFormInfo: 表字段的过滤条件
    * */
-  const loadFields = async (directoryId: string, filterFormInfo: string) => {
+  const loadFields = async (directoryId: string, filterFormInfo: string[]) => {
+    const modified = removePrefixLetters(filterFormInfo);
     const allDriectorys = await orgCtrl.loadAxwDirectorys();
     const curentDirectory = allDriectorys.find((a) => a.id === directoryId);
     if (curentDirectory) {
       if (await curentDirectory.loadContent(true)) {
         const curentData = curentDirectory.content();
-        const fieldsData: IForm = curentData.find(
-          (a) => a.name === filterFormInfo,
-        ) as IForm;
-        if (fieldsData) {
-          setFields(await fieldsData.loadFields());
+        for (const j of modified) {
+          const fieldsData: IForm = curentData.find((a) => a.id === j) as IForm;
+          if (fieldsData) {
+            return await fieldsData.loadFields();
+          }
         }
       }
     }
   };
 
-  console.log('1111q----', fields);
-
+  /** 加载主表每一项 */
   const loadItems = () => {
     const items = [];
-    for (const form of props.data) {
+    for (const form of primaryFormsData) {
       const belong =
-        orgCtrl.user.companys.find((a) => a.id == form?.belongId) || orgCtrl.user;
+        orgCtrl.user.companys.find((a) => a.id == form.data?.belongId) || orgCtrl.user;
       items.push({
-        key: form.id,
-        label: form.name,
+        key: form.data.id,
+        label: form.data.name,
         forceRender: true,
         children: (
           <WorkFormViewer
-            form={{ id: form.id, name: form.name } as schema.XForm}
-            fields={fields}
-            data={form}
+            form={{ id: form.data.id, name: form.data.name } as schema.XForm}
+            fields={form.fields}
+            data={form.data}
             changedFields={[]}
             rules={[]}
             belong={belong}
@@ -74,31 +79,51 @@ const WorkHistoryForm: React.FC<IWorkFormProps> = (props) => {
 
   /** tabs页切换事件 */
   const onTabsChange = (key: string) => {
-    const findCurent = props.data.find((i: any) => i.id === key);
-    if (findCurent) {
-      loadFields('535176817938677761', findCurent.name);
-    }
     setActiveTabKey(key);
   };
 
-  /** 初始化加载表单字段 */
+  /** 初始化处理数据 */
   useEffect(() => {
-    loadFields('535176817938677761', props.data[0].name);
-  }, []);
-
-  useEffect(() => {
-    let primaryFormsData: any[] = [];
+    let promises: any[] = [];
+    const existingNames = new Set<string>();
     props.data.forEach((i: any) => {
-      if (!primaryFormsData.find((s) => s.form.name === i.name) && i.name !== '') {
-        loadFields('535176817938677761', i.name);
-        primaryFormsData.push({
-          form: i,
-          fields: fields,
-        });
+      console.log('初始化处理数据', i);
+
+      if (!existingNames.has(i.name) && i.name !== '选择成果（成果赋权）') {
+        existingNames.add(i.name);
+        const [enObj] = filterKeys(i);
+        promises.push(
+          loadFields('535176817938677761', i.labels).then((res) => ({
+            fields: res,
+            data: filterShowData(res!, i, enObj),
+          })),
+        );
       }
     });
-    console.log('yyyyyyyyyyyyyy', primaryFormsData);
+    Promise.all(promises).then((res) => {
+      setPrimaryFormsData(res);
+    });
   }, [props.data]);
+
+  /** 过滤展示数据 */
+  const filterShowData = (fields: model.FieldModel[], data: any, otherData: any) => {
+    const newData: any = {};
+    fields.forEach((c: any) => {
+      if (data['T' + c.id]) {
+        newData[c.id] = data['T' + c.id];
+      } else {
+        if (data[c.code]) {
+          newData[c.id] = data[c.code];
+        }
+      }
+    });
+    return { ...otherData, ...newData };
+  };
+
+  /** 过滤Labels前面的字母 */
+  const removePrefixLetters = (arr: string[]): string[] => {
+    return arr.map((item) => item.substring(1));
+  };
 
   return (
     <div style={{ padding: 10 }}>

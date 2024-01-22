@@ -71,9 +71,9 @@ const WorkFormView: React.FC<IProps> = (props) => {
   useEffect(() => {
     if (isTransferHistory) {
       loadMasterInstance(props.thingData.MASTERID, [
-        '上传附件（成果赋权）',
-        '权益分配确定',
-        '选择成果（成果赋权）',
+        'F535176821864546305', // 上传附件（成果赋权）
+        'F535176821646442497', // 权益分配确定
+        'F535176821327675393', // 选择成果（成果赋权）
       ]);
     }
   }, [isTransferHistory]);
