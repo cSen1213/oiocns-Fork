@@ -1,16 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import orgCtrl from '@/ts/controller';
-import { common, model, schema } from '@/ts/base';
+import { model, schema } from '@/ts/base';
 import { IBelong, IForm } from '@/ts/core';
 import { Tabs } from 'antd';
 import { filterKeys } from '@/utils/index';
 import WorkFormViewer from '@/components/DataStandard/WorkForm/Viewer';
-// import PrimaryForms from './primary';
-// import DetailForms from './detail';
-// import { formatDate } from '@/utils';
-// import { getNodeByNodeId } from '@/utils/tools';
-// import useObjectUpdate from '@/hooks/useObjectUpdate';
-// import { logger } from '@/ts/base/common/logger';
+import GenerateThingTable from '@/executor/tools/generate/thingTable';
 
 interface IWorkFormProps {
   allowEdit: boolean;
@@ -42,7 +37,7 @@ const WorkHistoryForm: React.FC<IWorkFormProps> = (props) => {
       if (await curentDirectory.loadContent(true)) {
         const curentData = curentDirectory.content();
         for (const j of modified) {
-          const fieldsData: IForm = curentData.find((a) => a.id === j) as IForm;
+          const fieldsData: IForm = curentData.find((a: any) => a.id === j) as IForm;
           if (fieldsData) {
             return await fieldsData.loadFields();
           }
@@ -77,33 +72,55 @@ const WorkHistoryForm: React.FC<IWorkFormProps> = (props) => {
     return items;
   };
 
+  /** 加载子表每一项 */
+  const loadDetailItems = () => {
+    const items = [];
+    for (const form of detailFormsData) {
+      items.push({
+        key: form.data[0]?.id,
+        label: form.data[0]?.name,
+        forceRender: true,
+        children: (
+          <GenerateThingTable
+            key={form.data[0]?.id}
+            fields={form.fields}
+            height={500}
+            dataIndex={'attribute'}
+            selection={
+              props.allowEdit
+                ? {
+                    mode: 'multiple',
+                    allowSelectAll: true,
+                    selectAllMode: 'allPages',
+                    showCheckBoxesMode: 'always',
+                  }
+                : undefined
+            }
+            toolbar={{
+              visible: true,
+              items: [
+                {
+                  name: 'columnChooserButton',
+                  location: 'after',
+                },
+                {
+                  name: 'searchPanel',
+                  location: 'after',
+                },
+              ],
+            }}
+            dataSource={form.data}
+          />
+        ),
+      });
+    }
+    return items;
+  };
+
   /** tabs页切换事件 */
   const onTabsChange = (key: string) => {
     setActiveTabKey(key);
   };
-
-  /** 初始化处理数据 */
-  useEffect(() => {
-    let promises: any[] = [];
-    const existingNames = new Set<string>();
-    props.data.forEach((i: any) => {
-      console.log('初始化处理数据', i);
-
-      if (!existingNames.has(i.name) && i.name !== '选择成果（成果赋权）') {
-        existingNames.add(i.name);
-        const [enObj] = filterKeys(i);
-        promises.push(
-          loadFields('535176817938677761', i.labels).then((res) => ({
-            fields: res,
-            data: filterShowData(res!, i, enObj),
-          })),
-        );
-      }
-    });
-    Promise.all(promises).then((res) => {
-      setPrimaryFormsData(res);
-    });
-  }, [props.data]);
 
   /** 过滤展示数据 */
   const filterShowData = (fields: model.FieldModel[], data: any, otherData: any) => {
@@ -125,31 +142,57 @@ const WorkHistoryForm: React.FC<IWorkFormProps> = (props) => {
     return arr.map((item) => item.substring(1));
   };
 
+  /** 过滤子表数据 */
+  const filterDetailFormsData = (data: any) => {
+    let detailFormData: any[] = [];
+    for (const k of data) {
+      detailFormData.push(k.data);
+    }
+    return {
+      fields: data[0]?.fields,
+      data: detailFormData,
+    };
+  };
+
+  /** 初始化处理数据 */
+  useEffect(() => {
+    let promises: any[] = [];
+    let promisesDetailForm: any[] = [];
+    const existingNames = new Set<string>();
+    props.data.forEach((i: any) => {
+      if (!existingNames.has(i.name) && i.name !== '选择成果（成果赋权）') {
+        existingNames.add(i.name);
+        const [enObj] = filterKeys(i);
+        promises.push(
+          loadFields('535176817938677761', i.labels).then((res) => ({
+            fields: res,
+            data: filterShowData(res!, i, enObj),
+          })),
+        );
+      }
+      if (i.name === '选择成果（成果赋权）') {
+        const [enObj] = filterKeys(i);
+        promisesDetailForm.push(
+          loadFields('535176817938677761', i.labels).then((res) => ({
+            fields: res,
+            data: filterShowData(res!, i, enObj),
+          })),
+        );
+      }
+    });
+    Promise.all(promises).then((res) => {
+      setPrimaryFormsData(res);
+    });
+    Promise.all(promisesDetailForm).then((res) => {
+      const result = filterDetailFormsData(res);
+      setDetailFormsData([result]);
+    });
+  }, [props.data]);
+
   return (
     <div style={{ padding: 10 }}>
       <Tabs items={loadItems()} activeKey={activeTabKey} onChange={onTabsChange} />
-      {/* {node.primaryForms && node.primaryForms.length > 0 && (
-        <PrimaryForms
-          {...props}
-          changedFields={changedFields}
-          forms={node.primaryForms}
-          getFormData={getFormData}
-          onChanged={(...props) => {
-            onValueChanged(...props, '主表');
-          }}
-        />
-      )}
-      {node.detailForms && node.detailForms.length > 0 && (
-        <DetailForms
-          {...props}
-          changedFields={changedFields}
-          forms={node.detailForms}
-          getFormData={getFormData}
-          onChanged={(...props) => {
-            onValueChanged(...props, '子表');
-          }}
-        />
-      )} */}
+      <Tabs items={loadDetailItems()} defaultActiveKey={detailFormsData[0]?.data?.id} />
     </div>
   );
 };
