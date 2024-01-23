@@ -78,7 +78,7 @@ const WorkFormView: React.FC<IProps> = (props) => {
     }
   }, [isTransferHistory]);
 
-  /** 加载流程数据 */
+  /** 加载主子表数据 */
   const loadMasterInstance = async (masterid: string, filterOptions: string[]) => {
     const instanceRes = await kernel.loadMasterInstance(
       props.form.belongId,
