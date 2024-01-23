@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Space, Spin, Button, Divider } from 'antd';
+import { Space, Spin, Button, Divider, Dropdown } from 'antd';
 import orgCtrl from '@/ts/controller';
 import { IFile } from '@/ts/core';
 import { command } from '@/ts/base';
@@ -12,7 +12,8 @@ import TypeIcon from '@/components/Common/GlobalComps/typeIcon';
 import cls from './index.module.less';
 import { AXWType } from './config/index';
 import { ImStack } from 'react-icons/im';
-
+import { cleanMenus } from '@/utils/tools';
+import { loadFileMenus } from '@/executor/fileOperate';
 type axwType = {
   title: string;
   id: string;
@@ -25,10 +26,11 @@ export default defineElement({
       const [data, setData] = useState<axwType[]>([]); // 数据源
       const [loading, setLoading] = useState<boolean>(false); // 加载动画
       const [dataSource, setDataSource] = useState<AXWType[]>([]); // 在线配置文件数据源
+      const belongId = sessionStorage.getItem('currentPageBelongId') ?? '';
 
       /** 加载安心屋配置文件 */
       const loadAxwConfig = async () => {
-        const axwConfigRes = await orgCtrl.loadAxwConfigDir();
+        const axwConfigRes = await orgCtrl.loadAxwConfigDir(belongId);
         if (axwConfigRes.length > 0) {
           if (await axwConfigRes[0].loadContent()) {
             let res: any = axwConfigRes[0].content();
@@ -56,7 +58,7 @@ export default defineElement({
 
       /** 加载主体数据 */
       const loadContents = async () => {
-        const axwDriectorys = await orgCtrl.loadAxwDirectorys();
+        const axwDriectorys = await orgCtrl.loadAxwDirectorys(belongId);
         const axwApplications = await orgCtrl.loadApplications();
         const promises = dataSource?.map(async (item) => {
           const finds: any[] = [];
@@ -119,30 +121,39 @@ export default defineElement({
           loadContents();
         }
       }, [dataSource]);
-
+      const contextMenu = (file: IFile) => {
+        return {
+          items: cleanMenus(loadFileMenus(file)) || [],
+          onClick: ({ key }: { key: string }) => {
+            command.emitter('executor', key, file);
+          },
+        };
+      };
       const loadCommonCard = (item: any) => (
-        <div
-          className="appCard"
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100px',
-            alignItems: 'center',
-          }}
-          onClick={() => {
-            command.emitter('executor', 'open', item);
-          }}>
-          <EntityIcon entity={item?.metadata} size={35} />
+        <Dropdown key={item.key} menu={contextMenu(item)} trigger={['contextMenu']}>
           <div
-            className="appName"
+            className="appCard"
             style={{
-              width: '100px',
-              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100px',
+              alignItems: 'center',
+            }}
+            onClick={() => {
+              command.emitter('executor', 'open', item);
             }}>
-            {/* {item?.aliasName || item?.name} */}
-            {item?.name}
+            <EntityIcon entity={item?.metadata} size={35} />
+            <div
+              className="appName"
+              style={{
+                width: '100px',
+                textAlign: 'center',
+              }}>
+              {/* {item?.aliasName || item?.name} */}
+              {item?.name}
+            </div>
           </div>
-        </div>
+        </Dropdown>
       );
 
       const loadGroupItem = (title: string, data: IFile[]) => {

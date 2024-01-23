@@ -48,6 +48,7 @@ const NavigationBar: React.FC<{
     const navigation: NavigationItem = {
       key: generateUuid(),
       label: item.name,
+      belongId: item.spaceId,
       backgroundImageUrl: '',
       type: 'page',
       component: <ViewerHost ctx={{ view: new ViewerManager(item) }} />,

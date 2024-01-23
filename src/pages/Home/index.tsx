@@ -4,6 +4,7 @@ import NavigationBar, { allPages } from './components/NavigationBar';
 export interface NavigationItem {
   key: string;
   label: string;
+  belongId?: string;
   backgroundImageUrl: string;
   type: string;
   component: any;
@@ -26,6 +27,7 @@ const Home: React.FC = () => {
         list={allPages}
         onChange={(item) => {
           setCurrent(item);
+          sessionStorage.setItem('currentPageBelongId', item.belongId ?? '');
         }}
       />
     </div>

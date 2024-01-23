@@ -100,26 +100,38 @@ class IndexController extends Controller {
   }
 
   /** 读取安心屋的配置文件 */
-  async loadAxwConfigDir(): Promise<IDirectory[]> {
+  async loadAxwConfigDir(belongId: string = '464368384847515648'): Promise<IDirectory[]> {
     const directorys: IDirectory[] = [];
     // 安心屋工作台配置标准
     for (const directory of this.targets
-      .filter((i) => i.session.isMyChat)
+      // .filter((i) => i.session.isMyChat)
+      // .filter((s) => s.belongId === belongId)
       .map((a) => a.directory)) {
       directorys.push(...(await directory.loadAllDirectorys()));
     }
+    console.log(
+      this.user.companys.map((s) => s.id),
+      directorys.filter(
+        (i) => i.code === 'AXWCONFIG' && i.name === '安心屋工作台配置标准',
+      ),
+      belongId,
+    );
+
     return directorys.filter(
       (i) => i.code === 'AXWCONFIG' && i.name === '安心屋工作台配置标准',
+      // i.spaceId === belongId,
     );
   }
 
   /** 加载安心屋所有目录 */
-  async loadAxwDirectorys(): Promise<IDirectory[]> {
+  async loadAxwDirectorys(
+    belongId: string = '464368384847515648',
+  ): Promise<IDirectory[]> {
     const directorys: IDirectory[] = [];
     for (const directory of this.targets
-      .filter((i) => i.session.isMyChat)
+      // .filter((i) => i.session.isMyChat)
       // 只要浙江省科学技术厅下的资源
-      .filter((s) => s.belongId === '464368384847515648')
+      .filter((s) => s.spaceId === belongId)
       .map((a) => a.directory)) {
       directorys.push(...(await directory.loadAllDirectorys()));
     }
@@ -127,12 +139,14 @@ class IndexController extends Controller {
   }
 
   /** 加载安心屋下的所有应用 */
-  async loadAxwApplication(): Promise<IApplication[]> {
+  async loadAxwApplication(
+    belongId: string = '464368384847515648',
+  ): Promise<IApplication[]> {
     const applications: IApplication[] = [];
     for (const application of this.targets
-      .filter((i) => i.session.isMyChat)
+      // .filter((i) => i.session.isMyChat)
       // 只要浙江省科学技术厅下的资源
-      .filter((s) => s.belongId === '464368384847515648')
+      .filter((s) => s.belongId === belongId)
       .map((a) => a.directory)) {
       applications.push(...(await application.loadAllApplication()));
     }
@@ -154,11 +168,29 @@ class IndexController extends Controller {
   /** 所有相关页面 */
   async loadPages(): Promise<IPageTemplate[]> {
     const pages: IPageTemplate[] = [];
+    const result: IPageTemplate[] = [];
     for (const directory of this.targets.map((t) => t.directory)) {
       const templates = await directory.loadAllTemplate();
       pages.push(...templates.filter((item) => item.metadata.public));
     }
-    return pages;
+    if (pages.length > 0) {
+      console.log(
+        'sssss',
+        pages.filter((s) => s.name.includes('安心屋')),
+      );
+    }
+    pages.forEach((c) => {
+      const _page = c;
+      _page.title = `${c.name}(${c.belong.name})`;
+      if (
+        result.find((s) => s.name === c.name && s.id === c.id && s.spaceId === c.spaceId)
+      ) {
+        return;
+      } else {
+        result.push(_page);
+      }
+    });
+    return result;
   }
 }
 

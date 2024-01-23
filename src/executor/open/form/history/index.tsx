@@ -23,7 +23,7 @@ interface IProps {
 const ThingView: React.FC<IProps> = (props) => {
   const [curentInstance, setCurentInstance] = useState<any[]>([]); // 迁移数据实例
   const [fields, setFields] = useState<model.FieldModel[]>([]); // 表单字段
-  const [conversionMasterId, setConversionMasterId] = useState<string>(''); // 转化信息 MasterId
+  const [conversionMasterId, setConversionMasterId] = useState<string>(''); // 成果转化列表 MasterId
 
   const hasDoneTasks = Object.values(props.thingData.archives);
   const isTransferHistory = hasDoneTasks.length === 0; // 是否为成果迁移历史数据
@@ -31,7 +31,7 @@ const ThingView: React.FC<IProps> = (props) => {
   const convertData = () => {
     let data: any = {};
     for (let [key, value] of Object.entries(props.thingData)) {
-      const field = props.form.fields.find((a) => a.code == key);
+      const field = props.form.fields.find((a: any) => a.code == key);
       if (field) {
         data[field.id] = value;
       }
@@ -43,7 +43,7 @@ const ThingView: React.FC<IProps> = (props) => {
   const getMasterId = async (masterOptions: any, filterOptions: string[]) => {
     const masterIdRes = await kernel.loadMasterId(props.form.belongId, masterOptions);
     if (masterIdRes.code === 200 && masterIdRes.data.length > 0) {
-      // 如果为转化信息表 那么收集这个MasterId
+      // 如果为成果转化列表 那么收集这个MasterId
       if (masterOptions.match.name === '选择成果（成果转化）') {
         setConversionMasterId(masterIdRes.data[0].MASTERID);
       }
@@ -79,7 +79,7 @@ const ThingView: React.FC<IProps> = (props) => {
       if (await curentDirectory.loadContent(true)) {
         const curentData = curentDirectory.content();
         const fieldsData: IForm = curentData.find(
-          (a) => a.name === filterFormInfo,
+          (a: any) => a.name === filterFormInfo,
         ) as IForm;
         if (fieldsData) {
           setFields(await fieldsData.loadFields());
@@ -98,7 +98,7 @@ const ThingView: React.FC<IProps> = (props) => {
             ZLID: props.thingData.RECID,
           },
         },
-        ['转化信息'],
+        ['F535176818869813249'], //成果转化列表
       );
     }
   }, [isTransferHistory]);
@@ -118,45 +118,45 @@ const ThingView: React.FC<IProps> = (props) => {
                 ZLID: props.thingData.RECID,
               },
             },
-            ['转化信息'],
+            ['F535176818869813249'], //成果转化列表
           );
-          loadFields('535176817745739777', '转化信息');
+          loadFields('535176817745739777', '成果转化列表');
           break;
         case '3':
           getMasterId(
             {
               match: {
-                name: '转化合同登记',
+                name: '转化合同列表',
                 CGZHRECID: conversionMasterId,
               },
             },
-            ['转化合同登记'],
+            ['F535176822128787457'], // 转化合同列表
           );
-          loadFields('535176818005786625', '转化合同登记');
+          loadFields('535176818005786625', '转化合同列表');
           break;
         case '4':
           getMasterId(
             {
               match: {
-                name: '收益分配登记',
+                name: '收益分配列表',
                 CGZHRECID: conversionMasterId,
               },
             },
-            ['收益分配登记'],
+            ['F535176823366107137'], // 收益分配列表
           );
-          loadFields('535176818379079681', '收益分配登记');
+          loadFields('535176818379079681', '收益分配列表');
           break;
         case '5':
           getMasterId(
             {
               match: {
-                name: '选择成果（成果赋权）', // 从哪张表里查找MasterId
+                name: '成果赋权列表', // 从哪张表里查找MasterId
                 ZLID: props.thingData.RECID, // 通过职务成果ID查找专利ID
               },
             },
-            ['选择成果（成果赋权）'], // 被查找的数据所在的表
+            ['F535176821000519681'], //成果赋权列表 // 被查找的数据所在的表
           );
-          loadFields('535176817938677761', '选择成果（成果赋权）'); // 被查找的数据的表的所在目录 和这个表的名称
+          loadFields('535176817938677761', '成果赋权列表'); // 被查找的数据的表的所在目录 和这个表的名称
           break;
         default:
           break;
@@ -179,7 +179,12 @@ const ThingView: React.FC<IProps> = (props) => {
                 changedFields={[]}
                 key={props.form.id}
                 form={props.form.metadata}
-                fields={props.form.fields}
+                fields={props.form.fields
+                  .map((field: any, idx: number) => {
+                    field.options!.hideField = false;
+                    return idx < 28 ? field : undefined;
+                  })
+                  .filter(Boolean)}
                 data={convertData()}
                 belong={props.form.directory.target.space}
               />
@@ -189,18 +194,18 @@ const ThingView: React.FC<IProps> = (props) => {
           },
           {
             key: '2',
-            label: `转化信息`,
+            label: `成果转化列表`,
             children: (
               <>
                 {isTransferHistory ? (
                   <HistoryView
-                    title="转化信息"
+                    title="成果转化列表"
                     fields={fields}
                     instance={curentInstance}
                   />
                 ) : (
                   <TaskView
-                    title="转化信息"
+                    title="成果转化列表"
                     instance={hasDoneTasks.find(
                       (taskItem) => taskItem.defineId === '535193248780660736',
                     )}
