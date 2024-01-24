@@ -284,13 +284,7 @@ const ThingView: React.FC<IProps> = (props) => {
                     )}
                   />
                 ) : (
-                  <TaskView
-                    title="合同信息"
-                    instance={hasDoneTasks.find(
-                      (taskItem) => taskItem.defineId === '535193248780660736',
-                    )}
-                    formId="535176818869813249"
-                  />
+                  <TaskView title="合同信息" instance={[]} formId="535176818869813249" />
                 )}
               </>
             ),
