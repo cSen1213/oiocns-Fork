@@ -9,6 +9,7 @@ import ThingArchive from '../detail/archive';
 import TaskView from './taskView';
 import HistoryView from './historyView';
 import { kernel } from '@/ts/base';
+import { filterKeys } from '@/utils/index';
 import BaseForm from './baseForm';
 interface IProps {
   form: IForm;
@@ -22,8 +23,11 @@ interface IProps {
  */
 const ThingView: React.FC<IProps> = (props) => {
   const [curentInstance, setCurentInstance] = useState<any[]>([]); // 迁移数据实例
+  const [currentProcess, setCurrentProcess] = useState<any[]>([]); // 迁移数据流程
   const [fields, setFields] = useState<model.FieldModel[]>([]); // 表单字段
+  const [processFields, setProcessFields] = useState<model.FieldModel[]>([]); // 流程表单字段
   const [conversionMasterId, setConversionMasterId] = useState<string>(''); // 成果转化列表 MasterId
+  const [dataSource, setDataSource] = useState<any[]>([]); // 迁移数据流程
 
   const hasDoneTasks = Object.values(props.thingData.archives);
   const isTransferHistory = hasDoneTasks.length === 0; // 是否为成果迁移历史数据
@@ -53,7 +57,7 @@ const ThingView: React.FC<IProps> = (props) => {
     }
   };
 
-  /** 加载流程数据 */
+  /** 加载主子表数据 */
   const loadMasterInstance = async (masterid: string, filterOptions: string[]) => {
     const instanceRes = await kernel.loadMasterInstance(
       props.form.belongId,
@@ -64,6 +68,20 @@ const ThingView: React.FC<IProps> = (props) => {
       setCurentInstance(instanceRes.data);
     } else {
       setCurentInstance([]);
+    }
+  };
+
+  /** 加载流程数据 */
+  const loadProcessData = async (masterid: string, filterOptions: string[]) => {
+    const instanceRes = await kernel.loadMasterInstance(
+      props.form.belongId,
+      masterid,
+      filterOptions,
+    );
+    if (instanceRes.code === 200 && instanceRes.data.length > 0) {
+      setCurrentProcess(instanceRes.data);
+    } else {
+      setCurrentProcess([]);
     }
   };
 
@@ -82,26 +100,15 @@ const ThingView: React.FC<IProps> = (props) => {
           (a: any) => a.name === filterFormInfo,
         ) as IForm;
         if (fieldsData) {
+          if (filterFormInfo === '审批流程') {
+            //  在这里可以查看审批流程的字段值
+            setProcessFields(await fieldsData.loadFields());
+          }
           setFields(await fieldsData.loadFields());
         }
       }
     }
   };
-
-  /** 如果为历史迁移数据，初始化时加载必要数据 */
-  useEffect(() => {
-    if (isTransferHistory) {
-      getMasterId(
-        {
-          match: {
-            name: '选择成果（成果转化）',
-            ZLID: props.thingData.RECID,
-          },
-        },
-        ['F535176818869813249'], //成果转化列表
-      );
-    }
-  }, [isTransferHistory]);
 
   /** tabs页切换事件 */
   const onTabsChange = (key: string) => {
@@ -150,7 +157,7 @@ const ThingView: React.FC<IProps> = (props) => {
           getMasterId(
             {
               match: {
-                name: '成果赋权列表', // 从哪张表里查找MasterId
+                name: '选择成果（成果赋权）', // 从哪张表里查找MasterId
                 ZLID: props.thingData.RECID, // 通过职务成果ID查找专利ID
               },
             },
@@ -163,6 +170,49 @@ const ThingView: React.FC<IProps> = (props) => {
       }
     }
   };
+
+  /** 如果为历史迁移数据，初始化时加载必要数据 */
+  useEffect(() => {
+    if (isTransferHistory) {
+      getMasterId(
+        {
+          match: {
+            name: '选择成果（成果转化）',
+            ZLID: props.thingData?.RECID,
+          },
+        },
+        ['F535176818869813249'], //成果转化列表
+      );
+    }
+    loadProcessData(props.thingData?.MASTERID, ['F535510967807787009']);
+    loadFields('535510670867841025', '审批流程');
+  }, [isTransferHistory]);
+
+  /** 处理流程表格的数据 */
+  useEffect(() => {
+    if (currentProcess && currentProcess.length > 0) {
+      const result = currentProcess.map((a: any) => {
+        const [enObj] = filterKeys(a);
+        /* 去除办事数据 */
+        delete enObj.archives;
+        const newData: any = {};
+        processFields.forEach((c: model.FieldModel) => {
+          if (a['T' + c.id]) {
+            newData[c.id] = a['T' + c.id];
+          } else {
+            if (a[c.code]) {
+              newData[c.id] = a[c.code];
+            }
+          }
+        });
+        return {
+          ...enObj,
+          ...newData,
+        };
+      });
+      setDataSource(result);
+    }
+  }, [currentProcess, processFields]);
 
   return (
     <Card>
@@ -187,6 +237,7 @@ const ThingView: React.FC<IProps> = (props) => {
                   .filter(Boolean)}
                 data={convertData()}
                 belong={props.form.directory.target.space}
+                processData={dataSource}
               />
             ) : (
               <BaseForm instances={Object.values(props.thingData.archives)} />
@@ -202,6 +253,9 @@ const ThingView: React.FC<IProps> = (props) => {
                     title="成果转化列表"
                     fields={fields}
                     instance={curentInstance}
+                    processData={dataSource.filter(
+                      (i) => i['535542249707159553'] === '成果转化',
+                    )}
                   />
                 ) : (
                   <TaskView
@@ -225,6 +279,9 @@ const ThingView: React.FC<IProps> = (props) => {
                     title="合同信息"
                     fields={fields}
                     instance={curentInstance}
+                    processData={dataSource.filter(
+                      (i) => i['535542249707159553'] === '转化合同',
+                    )}
                   />
                 ) : (
                   <TaskView
@@ -248,6 +305,9 @@ const ThingView: React.FC<IProps> = (props) => {
                     title="收益分配信息"
                     fields={fields}
                     instance={curentInstance}
+                    processData={dataSource.filter(
+                      (i) => i['535542249707159553'] === '收益分配',
+                    )}
                   />
                 ) : (
                   <TaskView
@@ -271,6 +331,9 @@ const ThingView: React.FC<IProps> = (props) => {
                     title="赋权信息"
                     fields={fields}
                     instance={curentInstance}
+                    processData={dataSource.filter(
+                      (i) => i['535542249707159553'] === '成果赋权',
+                    )}
                   />
                 ) : (
                   <TaskView

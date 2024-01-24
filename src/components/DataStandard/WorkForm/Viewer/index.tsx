@@ -3,10 +3,13 @@ import { IBelong } from '@/ts/core';
 import React, { useEffect } from 'react';
 import Toolbar, { Item } from 'devextreme-react/toolbar';
 import FormItem from './formItem';
+import { Table } from 'antd';
 import { Emitter, logger } from '@/ts/base/common';
 import { getItemNums } from '../Utils';
 import useStorage from '@/hooks/useStorage';
 import useObjectUpdate from '@/hooks/useObjectUpdate';
+import EntityIcon from '@/components/Common/GlobalComps/entityIcon';
+import dayjs from 'dayjs';
 
 const WorkFormViewer: React.FC<{
   data: any;
@@ -18,12 +21,49 @@ const WorkFormViewer: React.FC<{
   changedFields: model.MappingData[];
   rules: model.RenderRule[];
   formData?: model.FormEditData;
+  processData?: any; // 迁移数据-流程数据
   onValuesChange?: (fieldId: string, value: any, data: any) => void;
 }> = (props) => {
   props.data.name = props.form.name;
   const [key, forceUpdate] = useObjectUpdate(props.rules);
   const [notifyEmitter] = React.useState(new Emitter());
   const [colNum, setColNum] = useStorage('workFormColNum', '一列');
+
+  /** 流程信息表头 */
+  const columns = [
+    {
+      title: '单位名称',
+      dataIndex: 'belongId',
+      render: (text: string) => <EntityIcon entityId={text} showName />,
+    },
+    {
+      title: '审批人',
+      dataIndex: '535503820453724161',
+    },
+    {
+      title: '节点',
+      dataIndex: '535504245550628865',
+      ellipsis: true,
+    },
+    {
+      title: '审批时间',
+      dataIndex: '535504130475704321',
+      render: (text: string) => {
+        return <div>{dayjs(text).format('YYYY-MM-DD HH:mm:ss')}</div>;
+      },
+    },
+    {
+      title: '业务类型',
+      dataIndex: '535542249707159553',
+    },
+    {
+      title: '备注信息',
+      width: 300,
+      dataIndex: '535504663986978817',
+      ellipsis: true,
+    },
+  ];
+
   const onValueChange = (fieldId: string, value: any, refresh: boolean = true) => {
     const checkHasChanged = (fieldId: string, value: any) => {
       const oldValue = props.data[fieldId];
@@ -263,6 +303,15 @@ const WorkFormViewer: React.FC<{
             />
           );
         })}
+
+        {props.processData && (
+          <Table
+            title={() => <strong>流程明细</strong>}
+            columns={columns}
+            size="small"
+            dataSource={props.processData || []}
+          />
+        )}
       </div>
     </div>
   );
