@@ -8,6 +8,7 @@ import { InstanceDataModel } from '@/ts/base/model';
 import EntityIcon from '@/components/Common/GlobalComps/entityIcon';
 import WorkForm from '@/executor/tools/workForm';
 import WorkHistoryForm from './workHistoryForm';
+import { formConfig } from './billHistoryConfig';
 interface IProps {
   form: IForm;
   thingData: schema.XThing;
@@ -49,6 +50,7 @@ const WorkFormView: React.FC<IProps> = (props) => {
   const isTransferHistory = !hasDoneTasks || hasDoneTasks.length == 0; // 标记是否为历史迁移数据
   const [curentInstance, setCurentInstance] = useState<any[]>([]); // 迁移数据实例
   const [fieldDirectoryId, setFieldDirectoryId] = useState<string>(''); // 加载字段所处的目录Id
+  const [detailFormNames, setDetailFormNames] = useState<string[]>(['']); // 子表名称
   const instance = hasDoneTasks[0];
   const [task, setTask] = useState<schema.XWorkTask[]>();
   const [data, setData] = useState<InstanceDataModel>();
@@ -72,31 +74,13 @@ const WorkFormView: React.FC<IProps> = (props) => {
 
   useEffect(() => {
     if (isTransferHistory) {
-      let params: string[] = [];
-      switch (props.openForm) {
-        case '535176821000519681': // 成果赋权列表
-          params = [
-            'F535176821864546305', // 上传附件（成果赋权）
-            'F535176821646442497', // 权益分配确定
-            'F535176821327675393', // 选择成果（成果赋权）
-          ];
-          setFieldDirectoryId('535176817938677761');
-          break;
-        case '535176818869813249': // 成果转化列表
-          params = [
-            'F535176820635615233', // 分配比例
-            'F535176819637370881', // 定价/收益方式确定
-            'F535176819897417729', //  意向受让方
-            'F535176819322798081', // 选择成果（成果转化）
-            'F535176820241350657', // 团队内部收益分配
-            'F535176820459454465', // 上传附件（成果转化）
-          ];
-          setFieldDirectoryId('535176817745739777');
-          break;
-        default:
-          break;
-      }
-      loadMasterInstance(props.thingData.MASTERID, params);
+      formConfig.forEach((item) => {
+        if (item.formTypeId === props.openForm) {
+          setFieldDirectoryId(item.fieldDirectoryId);
+          loadMasterInstance(props.thingData.MASTERID, item.relevanceFormId);
+          setDetailFormNames(item.detailFormNames);
+        }
+      });
     }
   }, [isTransferHistory]);
 
@@ -180,6 +164,7 @@ const WorkFormView: React.FC<IProps> = (props) => {
             belong={historyBelong}
             data={curentInstance}
             fieldsDriectoryId={fieldDirectoryId}
+            detailFormNames={detailFormNames}
           />
         )}
       </>

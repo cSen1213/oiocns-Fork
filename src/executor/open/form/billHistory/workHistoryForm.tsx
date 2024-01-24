@@ -12,6 +12,7 @@ interface IWorkFormProps {
   belong: IBelong;
   data: any;
   fieldsDriectoryId: string; // 加载字段所处的目录Id
+  detailFormNames: string[];
 }
 
 interface formType {
@@ -170,62 +171,25 @@ const WorkHistoryForm: React.FC<IWorkFormProps> = (props) => {
     let promisesDetailForm: any[] = [];
     const existingNames = new Set<string>();
     props.data.forEach((i: any) => {
-      switch (props.fieldsDriectoryId) {
-        case '535176817938677761':
-          if (!existingNames.has(i.name) && i.name !== '选择成果（成果赋权）') {
-            existingNames.add(i.name);
-            const [enObj] = filterKeys(i);
-            promises.push(
-              loadFields(props.fieldsDriectoryId, i.labels).then((res) => ({
-                fields: res,
-                data: filterShowData(res!, i, enObj),
-              })),
-            );
-          }
-          if (i.name === '选择成果（成果赋权）') {
-            const [enObj] = filterKeys(i);
-            promisesDetailForm.push(
-              loadFields(props.fieldsDriectoryId, i.labels).then((res) => ({
-                fields: res,
-                detailsFormData: filterShowData(res!, i, enObj),
-                data: [],
-              })),
-            );
-          }
-          break;
-        case '535176817745739777':
-          if (
-            !existingNames.has(i.name) &&
-            i.name !== '选择成果（成果转化）' &&
-            i.name !== '意向受让方' &&
-            i.name !== '分配比例'
-          ) {
-            existingNames.add(i.name);
-            const [enObj] = filterKeys(i);
-            promises.push(
-              loadFields(props.fieldsDriectoryId, i.labels).then((res) => ({
-                fields: res,
-                data: filterShowData(res!, i, enObj),
-              })),
-            );
-          }
-          if (
-            i.name === '选择成果（成果转化）' ||
-            i.name === '意向受让方' ||
-            i.name === '分配比例'
-          ) {
-            const [enObj] = filterKeys(i);
-            promisesDetailForm.push(
-              loadFields(props.fieldsDriectoryId, i.labels).then((res) => ({
-                fields: res,
-                detailsFormData: filterShowData(res!, i, enObj),
-                data: [],
-              })),
-            );
-          }
-          break;
-        default:
-          break;
+      if (!existingNames.has(i.name) && !props.detailFormNames.includes(i.name)) {
+        existingNames.add(i.name);
+        const [enObj] = filterKeys(i);
+        promises.push(
+          loadFields(props.fieldsDriectoryId, i.labels).then((res) => ({
+            fields: res,
+            data: filterShowData(res!, i, enObj),
+          })),
+        );
+      }
+      if (props.detailFormNames.includes(i.name)) {
+        const [enObj] = filterKeys(i);
+        promisesDetailForm.push(
+          loadFields(props.fieldsDriectoryId, i.labels).then((res) => ({
+            fields: res,
+            detailsFormData: filterShowData(res!, i, enObj),
+            data: [],
+          })),
+        );
       }
     });
     Promise.all(promises).then((res) => {
