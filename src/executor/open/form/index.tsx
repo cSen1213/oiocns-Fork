@@ -60,7 +60,7 @@ const FormView: React.FC<IProps> = ({ form, finished }) => {
     if (!selectMenu || !rootMenu) return <></>;
     const loadContent = () => {
       if (select) {
-        console.log('打开表单', form, form.metadata.openType);
+        console.log('打开表单', form.metadata);
 
         switch (form.metadata.openType) {
           case '事项':
@@ -70,6 +70,7 @@ const FormView: React.FC<IProps> = ({ form, finished }) => {
                 form={form}
                 thingData={select}
                 onBack={() => setSelcet(undefined)}
+                openForm={form.metadata.id}
               />
             );
           // 成果视图表单 查看
