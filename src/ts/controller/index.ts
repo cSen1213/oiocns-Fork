@@ -109,13 +109,6 @@ class IndexController extends Controller {
       .map((a) => a.directory)) {
       directorys.push(...(await directory.loadAllDirectorys()));
     }
-    console.log(
-      this.user.companys.map((s) => s.id),
-      directorys.filter(
-        (i) => i.code === 'AXWCONFIG' && i.name === '安心屋工作台配置标准',
-      ),
-      belongId,
-    );
 
     return directorys.filter(
       (i) => i.code === 'AXWCONFIG' && i.name === '安心屋工作台配置标准',
@@ -174,24 +167,19 @@ class IndexController extends Controller {
       pages.push(...templates.filter((item) => item.metadata.public));
     }
     if (pages.length > 0) {
-      console.log(
-        'sssss',
-        pages.filter((s) => s.name.includes('安心屋')),
-      );
+      pages.forEach((c) => {
+        const _page: any = c;
+        _page.title = `${c.name}(${c.belong.name})`;
+        if (
+          !result.find(
+            (s) => s.name === c.name && s.id === c.id && s.spaceId === c.spaceId,
+          )
+        ) {
+          result.push(_page);
+        }
+      });
     }
-    pages.forEach((c) => {
-      const _page = c;
-      _page.title = `${c.name}(${c.belong.name})`;
-      if (
-        result.find((s) => s.name === c.name && s.id === c.id && s.spaceId === c.spaceId)
-      ) {
-        return;
-      } else {
-        result.push(_page);
-      }
-    });
     return result;
   }
 }
-
 export default new IndexController();

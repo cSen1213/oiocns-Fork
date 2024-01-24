@@ -16,17 +16,19 @@ class Logger {
   onLogger?: (level: LoggerLevel, message: string) => void;
   constructor() {}
   info(message: MessageType): void {
+    console.info('日志', message);
     this._callback(LoggerLevel.info, message);
   }
   msg(message: MessageType): void {
+    console.info('日志', message);
     this._callback(LoggerLevel.msg, message);
   }
   warn(message: MessageType): void {
-    console.warn(message);
+    console.warn('日志', message);
     this._callback(LoggerLevel.warn, message);
   }
   error(message: MessageType): void {
-    console.error(message);
+    console.error('日志', message);
     this._callback(LoggerLevel.error, message);
   }
   unauth(): void {

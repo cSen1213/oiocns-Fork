@@ -78,10 +78,9 @@ export class PushAchievementTask implements PushAchievementTaskType {
     const sign = `${appKey}${appSecret}${timestampStr}`;
     //加密
     const md5Hash = Crypto.MD5(sign).toString().toLowerCase();
-    //TODO:修改为 companyName:this.companyName
     const res: any = await axios.post(
       baseUrl + '/userinfo/user/getAppKey',
-      { companyName: '浙江省农业科学院' },
+      { companyName: this.companyName }, //浙江省农业科学院 //杭州电子科技大学
       {
         headers: {
           'Content-Type': 'application/json',
@@ -146,9 +145,9 @@ export class PushAchievementTask implements PushAchievementTaskType {
     console.log('pushTransferData', achievement_no, this.instanceData);
     const data = this.instanceData.data; //formName
     const last = data[zhuanhua_tianxiexinxi_formId]?.at(-1);
-    const form1 = last?.after[0];
-    if (form1) {
-      form1[zhuanhua_jiaoyipzh] = achievement_no;
+    const mainForm = last?.after[0];
+    if (mainForm) {
+      mainForm[zhuanhua_jiaoyipzh] = achievement_no;
       this.instanceData.primary[zhuanhua_jiaoyipzh] = achievement_no;
       return true;
     }
@@ -165,8 +164,12 @@ export class PushAchievementTask implements PushAchievementTaskType {
 
 const pushAchievement = async (instanceData: model.InstanceDataModel, token: string) => {
   const last = instanceData.data[zhuanhua_tianxiexinxi_formId]?.at(-1);
-  const form1 = last?.after[0];
+  const mainForm = last?.after[0];
   const data = await getAchievementInfo(instanceData);
+  console.log('instanceData', instanceData);
+  console.log('========================================');
+  console.log('推送数据打印', data);
+
   const ret = await axios.post(baseUrl + `/api/open/achievement/submit`, data, {
     headers: {
       'Content-Type': 'application/json',
@@ -180,9 +183,10 @@ const pushAchievement = async (instanceData: model.InstanceDataModel, token: str
     if (datas) {
       const achievement_no = datas['achievement_no'];
       if (achievement_no) {
-        if (form1) {
-          form1[zhuanhua_jiaoyipzh] = achievement_no; //成果编号
-          logger.msg('推送成果成功! 交易凭证:' + achievement_no);
+        if (mainForm) {
+          mainForm[zhuanhua_jiaoyipzh] = achievement_no; //成果编号
+          mainForm['CG_CODE'] = achievement_no; //成果编号
+          logger.msg('推送成功! 交易凭证:' + achievement_no);
           return achievement_no;
         }
       }
@@ -198,10 +202,10 @@ const pushAchievement = async (instanceData: model.InstanceDataModel, token: str
 };
 
 const getAchievementInfo = async (instanceData: model.InstanceDataModel) => {
-  const form1 = instanceData.data[zhuanhua_tianxiexinxi_formId]?.at(-1)?.after.at(-1);
-  const form2 = instanceData.data[zhuanhua_xuanzechengguo_formId]?.at(-1)?.after;
-  if (form1 && form2) {
-    const detail = form2.map((a) => {
+  const mainForm = instanceData.data[zhuanhua_tianxiexinxi_formId]?.at(-1)?.after.at(-1);
+  const detailForm = instanceData.data[zhuanhua_xuanzechengguo_formId]?.at(-1)?.after;
+  if (mainForm && detailForm) {
+    const detail = detailForm.map((a) => {
       return {
         effective: 1, //生效状态 1:生效;0未生效
         owner: a['535176819490570247'] ?? '未知', //所有权人
@@ -212,9 +216,10 @@ const getAchievementInfo = async (instanceData: model.InstanceDataModel) => {
       };
     });
     const contact =
-      (await orgCtrl.user.findEntityAsync(form1['535176818974670850']))?.name ?? '未知'; //联系人
+      (await orgCtrl.user.findEntityAsync(mainForm['535176818974670850']))?.name ??
+      '未知'; //联系人
     var transfer_mode = 'apply_transfer';
-    switch (form1['535176818974670849']) {
+    switch (mainForm['535176818974670849']) {
       case 'S535176676863262722':
         transfer_mode = 'patent_transfer';
         break;
@@ -243,8 +248,24 @@ const getAchievementInfo = async (instanceData: model.InstanceDataModel) => {
         transfer_mode = 'other';
         break;
     }
+    var pricing_type = 'definite';
+    //定价方式
+    switch (mainForm['535176818974670848']) {
+      case 'S535176676733239298': //协议定价
+        pricing_type = 'definite';
+        break;
+      case 'S535176676733239300': //挂牌交易
+        pricing_type = 'range';
+        break;
+      case 'S535176676733239301': //公开拍卖
+        pricing_type = 'ordinary';
+        break;
+      default:
+        pricing_type = 'definite';
+        break;
+    }
     var maturity = 'development';
-    switch (form1['535176818970476552']) {
+    switch (mainForm['535176818970476552']) {
       case 'S535176676355751938':
         maturity = 'development';
         break;
@@ -263,7 +284,7 @@ const getAchievementInfo = async (instanceData: model.InstanceDataModel) => {
       default:
         break;
     }
-    // var classification = form1['505330904445624334'];
+    // var classification = mainForm['505330904445624334'];
     return {
       public: 1,
       is_back: true,
@@ -274,31 +295,33 @@ const getAchievementInfo = async (instanceData: model.InstanceDataModel) => {
       //成熟度
       maturity: maturity,
       //单据编号
-      invoice_no: form1['535176818970476545'],
+      invoice_no: String(mainForm['535176818970476545']),
       //成果名称
-      name_cn: form1['535176818970476546'],
-      //行业分类
-      classification: ['6', '6001'],
+      name_cn: mainForm['535176818970476546'],
       //成果详情
       patent_detail: detail,
       //定价方式
-      pricing_type: 'definite',
+      pricing_type: pricing_type,
       //成果说明
-      detail_url_cn: form1['535176818970476546'] ?? ' ',
+      detail_url_cn: mainForm['535176818974670852'] ?? ' ',
+      //行业分类
+      classification: ['3', '3001'],
       //所属地区
       affiliating_area: ['0', '330000', '330101'],
       //赋权年限
       permit_period: '',
+      //技术领域
+      technosphere: mainForm['535176818970476555'] ?? '',
       //价格
       price: {
-        // amount: form1['505330903510294534'],
-        amount: form2
+        // amount: mainForm['505330903510294534'],
+        amount: detailForm
           .map((c) => c['535176819490570248'])
           .reduce((acc, currVal) => (Number(acc) ?? 0) + (Number(currVal) ?? 0)),
       },
       //成果联系人
       contact: contact,
-      //接受成交主体类型
+      //接受成交主体类型 individual--个人 enterprise--企业
       principal_type: ['enterprise'],
     };
   }
